@@ -39,7 +39,7 @@ fun DailyForecast(
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth(.67f)
-            .fillMaxHeight(.47f)//45f
+            .fillMaxHeight(.46f)//45f
     ) {
         val (
             forecastImage,
@@ -77,14 +77,14 @@ fun DailyForecast(
         ForecastValue(modifier = Modifier.constrainAs(forecastValue) {
             top.linkTo(anchor = forecastImage.bottom)
             bottom.linkTo(anchor = description.top)
-            start.linkTo(anchor = parent.start, margin = 10.dp)
+            start.linkTo(anchor = parent.start, margin = 15.dp)
             end.linkTo(anchor = parent.end)
         })
 
         ForecastDescription(modifier = Modifier.constrainAs(description) {
             start.linkTo(anchor = parent.start)
             end.linkTo(anchor = parent.end)
-            top.linkTo(anchor = forecastValue.bottom, margin = 5.dp)
+            top.linkTo(anchor = forecastValue.bottom)
         })
     }
 }
