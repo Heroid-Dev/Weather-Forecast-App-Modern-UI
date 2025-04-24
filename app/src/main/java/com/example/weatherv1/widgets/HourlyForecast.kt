@@ -3,7 +3,6 @@ package com.example.weatherv1.widgets
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,11 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +60,7 @@ fun HourlyForecast() {
 @Composable
 fun HourlyForecastItem(hourlyWeather: HourlyWeather) {
     Box(
-        modifier = Modifier.padding(horizontal = 5.dp).width(80.dp).height(120.dp)
+        modifier = Modifier.padding(horizontal = 5.dp).width(80.dp).height(110.dp)
             .customShadow(
                 color = Color(0xFF5EB6FF),
                 alpha = .8f,
