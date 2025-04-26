@@ -26,39 +26,20 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.weatherv1.widgets.AirQualityBox
-import com.example.weatherv1.widgets.AppBarSuccessScreen
-import com.example.weatherv1.widgets.DailyForecast
-import com.example.weatherv1.widgets.HeaderHourlyForecast
-import com.example.weatherv1.widgets.HourlyForecast
+import com.example.weatherv1.widgets.InfiniteColorBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuccessScreen(
     //weatherInfo: Weather
 ) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val color1 = infiniteTransition.animateColor(
-        initialValue = Color(0xFFEDFAFF),
-        targetValue = Color(0xFF9FD6FF),
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "colorBackground1"
-    ).value
-    val color2 = infiniteTransition.animateColor(
-        initialValue = Color(0xFF5BBCFF),
-        targetValue = Color(0xFFEFF9FF),
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "colorBackground2"
-    ).value
-
-    Scaffold { innerPadding ->
-
+    InfiniteColorBackground(
+        color1 = Color(0xFFEDFAFF),
+        color2=Color(0xFF9FD6FF),
+        color3=Color(0xFF5BBCFF),
+        color4=Color(0xFFEFF9FF)
+    ) { color1,color2->
+        Scaffold { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -79,7 +60,6 @@ fun SuccessScreen(
                     AppBarSuccessScreen(
                         //weatherInfo = weatherInfo
                     )
-
                     DailyForecast(
                         //weatherInfo = weatherInfo
                     )
@@ -95,7 +75,7 @@ fun SuccessScreen(
                                 iterations = 1000,
                                 repeatDelayMillis = 1000,
 
-                            ),
+                                ),
                         text = "Similar temperatures continuing with a chance of rain tomorrow & Wednesday.",
                         style = MaterialTheme.typography.labelMedium,
                         color = Color(0xFF234195)
@@ -106,15 +86,16 @@ fun SuccessScreen(
                         //weatherInfo = weatherInfo
                     )
                     HeaderHourlyForecast(
-                        modifier = Modifier.padding(top = 8.dp)
-                    ) {
-
-                    }
+                        modifier = Modifier.padding(top = 8.dp),
+                        onClick = {
+                            //
+                        }
+                    )
                 }
                 HourlyForecast()
             }
         }
-
+    }
 }
 
 

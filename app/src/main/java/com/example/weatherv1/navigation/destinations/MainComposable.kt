@@ -5,7 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.example.weatherv1.navigation.Screen
 import com.example.weatherv1.screens.main.MainScreen
-import com.example.weatherv1.screens.main.MainViewModel
+import com.example.weatherv1.repositorys.MainViewModel
 
 
 fun NavGraphBuilder.mainComposable(

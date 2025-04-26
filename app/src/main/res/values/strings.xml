@@ -4,4 +4,5 @@
     <string name="location_icon">location icon</string>
     <string name="daily_forecast_icon">daily forecast icon</string>
     <string name="arrow_right">arrow right</string>
+    <string name="arrow_back">arrow_back</string>
 </resources>

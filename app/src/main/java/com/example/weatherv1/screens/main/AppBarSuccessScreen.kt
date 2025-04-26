@@ -1,4 +1,4 @@
-package com.example.weatherv1.widgets
+package com.example.weatherv1.screens.main
 
 import android.icu.text.DateFormat
 import androidx.compose.foundation.Image
@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.weatherv1.R
+import com.example.weatherv1.widgets.TopAppBarButton
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +55,8 @@ fun AppBarSuccessScreen(
 
 
 @Composable
-fun LocationInfo(city: String, localTime: Long) {
+fun LocationInfo(city: String,
+                 localTime: Long) {
     val dateFormat = DateFormat.getDateInstance(DateFormat.ERA_FIELD)
     val formatted = dateFormat.format(Date(localTime * 1000))
 

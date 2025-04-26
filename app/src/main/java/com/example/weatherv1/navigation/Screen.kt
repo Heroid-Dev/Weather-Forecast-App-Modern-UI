@@ -2,5 +2,7 @@ package com.example.weatherv1.navigation
 
 enum class Screen {
     MainScreen,
-    SplashScreen
+    SplashScreen,
+    NextDayScreen,
+    SearchScreen
 }
