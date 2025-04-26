@@ -1,4 +1,4 @@
-package com.example.weatherv1.widgets
+package com.example.weatherv1.screens.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.weatherv1.R
 import com.example.weatherv1.utils.customShadow
@@ -66,4 +67,13 @@ fun HeaderHourlyForecast(
             )
         }
     }
+}
+
+@Preview
+@Composable
+private fun HeaderHourlyForecastPreview() {
+    HeaderHourlyForecast(
+        modifier= Modifier,
+        onClick={}
+    )
 }

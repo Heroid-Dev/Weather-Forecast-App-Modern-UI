@@ -11,4 +11,10 @@ class NavScreen(
     val mainScreen:()-> Unit = {
         navController.navigate(Screen.MainScreen.name)
     }
+    val nextDayScreen:()-> Unit={
+        navController.navigate(Screen.NextDayScreen.name)
+    }
+    val searchScreen:()-> Unit={
+        navController.navigate(Screen.SearchScreen.name)
+    }
 }

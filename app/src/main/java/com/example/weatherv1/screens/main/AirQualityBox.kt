@@ -1,4 +1,4 @@
-package com.example.weatherv1.widgets
+package com.example.weatherv1.screens.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,7 +30,15 @@ import com.example.weatherv1.utils.customShadow
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AirQualityBox(modifier: Modifier= Modifier) {
+fun AirQualityBox(
+    modifier: Modifier= Modifier,
+    temp: Int=0,
+    precip: Int=0,
+    humidity: Int=0,
+    pressure: Int=0,
+    unIndex: Int=0,
+    wind: Int=0
+) {
     FlowRow(
         modifier = modifier.fillMaxWidth(),
         maxItemsInEachRow = 3,

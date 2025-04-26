@@ -1,10 +1,8 @@
-package com.example.weatherv1.screens.main
-
+package com.example.weatherv1.repositorys
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherv1.model.Weather
-import com.example.weatherv1.repositorys.WeatherRepository
 import com.example.weatherv1.widgets.RequestState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
