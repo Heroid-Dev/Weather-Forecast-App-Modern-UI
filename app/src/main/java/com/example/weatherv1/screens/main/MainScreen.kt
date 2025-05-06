@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.example.weatherv1.repositorys.MainViewModel
+import com.example.weatherv1.screens.error.ErrorScreen
 import com.example.weatherv1.screens.loading.LoadingScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -65,7 +66,7 @@ fun MainScreen(
             )
         },
         onError = {
-            Text(text = weatherState.getErrorOrNull().toString())
+            ErrorScreen()
         }
     )
 }
