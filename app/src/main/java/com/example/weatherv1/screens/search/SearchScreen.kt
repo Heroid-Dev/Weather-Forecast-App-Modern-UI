@@ -81,12 +81,14 @@ fun SearchScreen(
                     )
                 )
         ) {
-            TopBarSearchScreen()
+            TopBarSearchScreen(
+                onClickBackButton = navigateToMainScreen
+            )
         }
 
 
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().background(Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -111,7 +113,6 @@ fun SearchScreen(
                     },
                     modifier = Modifier.offset(y = textFieldOffsetY)
                 )
-
 
                 AnimatedVisibility(
                     visible = searchTriggered.value

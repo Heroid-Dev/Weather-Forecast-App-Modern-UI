@@ -4,5 +4,8 @@ enum class Screen {
     MainScreen,
     SplashScreen,
     NextDayScreen,
-    SearchScreen
+    SearchScreen,
+    AboutScreen,
+    FavoriteScreen,
+    SettingScreen
 }

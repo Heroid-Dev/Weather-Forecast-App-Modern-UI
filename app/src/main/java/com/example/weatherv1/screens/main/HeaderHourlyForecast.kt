@@ -26,7 +26,7 @@ import com.example.weatherv1.utils.customShadow
 @Composable
 fun HeaderHourlyForecast(
     modifier: Modifier,
-    onClick: () -> Unit
+    onHeaderForecastClicked: () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -52,7 +52,7 @@ fun HeaderHourlyForecast(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable {
-                onClick()
+               onHeaderForecastClicked()
             }
         ) {
             Text(
@@ -74,6 +74,6 @@ fun HeaderHourlyForecast(
 private fun HeaderHourlyForecastPreview() {
     HeaderHourlyForecast(
         modifier= Modifier,
-        onClick={}
+        onHeaderForecastClicked={}
     )
 }

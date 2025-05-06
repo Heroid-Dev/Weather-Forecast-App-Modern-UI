@@ -15,7 +15,7 @@ interface WeatherApi {
         @Path("city") city: String,
         @Path("days") days: String="next7days",
         @Query("unitGroup") unit: String="metric",
-        @Query("include") include: String="hours",
+        //@Query("include") include: String="hours%2Cfcst",
         @Query("key") key: String = Constants.API_KEY,
         @Query("contentType") contentType: String = "json"
     ): Weather

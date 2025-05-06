@@ -9,7 +9,9 @@ class NavScreen(
         navController.navigate(Screen.SplashScreen.name)
     }
     val mainScreen:()-> Unit = {
-        navController.navigate(Screen.MainScreen.name)
+        navController.navigate(Screen.MainScreen.name){
+
+        }
     }
     val nextDayScreen:()-> Unit={
         navController.navigate(Screen.NextDayScreen.name)
@@ -17,4 +19,14 @@ class NavScreen(
     val searchScreen:()-> Unit={
         navController.navigate(Screen.SearchScreen.name)
     }
+    val settingScreen:()-> Unit={
+        navController.navigate(Screen.SettingScreen.name)
+    }
+    val favoriteScreen:()-> Unit={
+        navController.navigate(Screen.FavoriteScreen.name)
+    }
+    val aboutScreen:()-> Unit={
+        navController.navigate(Screen.AboutScreen.name)
+    }
+
 }

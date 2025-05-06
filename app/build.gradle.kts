@@ -104,4 +104,10 @@ dependencies {
 
     implementation(libs.androidx.constraintlayout.compose)
 
+    implementation("com.google.accompanist:accompanist-permissions:0.28.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.android.gms:play-services-maps:18.0.0")
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
 }

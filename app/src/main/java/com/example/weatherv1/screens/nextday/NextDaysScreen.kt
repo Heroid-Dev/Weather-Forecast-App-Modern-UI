@@ -40,7 +40,9 @@ fun NextDaysScreen(navigateToMainScreen: () -> Unit) {
                 )
         )
         {
-            TopBarNextDaysScreen()
+            TopBarNextDaysScreen(
+                onBackClicked=navigateToMainScreen
+            )
         }
         Column(
             modifier = Modifier

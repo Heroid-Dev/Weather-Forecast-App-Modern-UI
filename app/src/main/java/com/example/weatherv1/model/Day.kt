@@ -25,7 +25,7 @@ data class Day(
     val solarenergy: Double,
     val solarradiation: Double,
     val source: String,
-    val stations: List<String>,
+    val stations: Any,
     val sunrise: String,
     val sunriseEpoch: Int,
     val sunset: String,

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.weatherv1.navigation.WeatherNavigation
 import com.example.weatherv1.repositorys.MainViewModel
@@ -14,18 +15,22 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { false }
+        }
+
+
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
             WeatherV1Theme {
-
-
-                        val mainViewModel = hiltViewModel<MainViewModel>()
-                        WeatherNavigation(mainViewModel = mainViewModel)
-
-
+                val mainViewModel = hiltViewModel<MainViewModel>()
+                WeatherNavigation(mainViewModel = mainViewModel)
             }
         }
     }
 }
+
+
 

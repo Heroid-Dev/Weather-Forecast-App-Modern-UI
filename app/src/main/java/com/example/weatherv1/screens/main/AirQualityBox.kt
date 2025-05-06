@@ -1,7 +1,12 @@
 package com.example.weatherv1.screens.main
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +19,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -31,14 +41,29 @@ import com.example.weatherv1.utils.customShadow
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AirQualityBox(
-    modifier: Modifier= Modifier,
-    temp: Int=0,
-    precip: Int=0,
-    humidity: Int=0,
-    pressure: Int=0,
-    unIndex: Int=0,
-    wind: Int=0
+    modifier: Modifier = Modifier,
+    temp: Int = 0,
+    precip: Int = 0,
+    humidity: Int = 0,
+    pressure: Int = 0,
+    unIndex: Int = 0,
+    wind: Int = 0
 ) {
+    var onClickState by remember { mutableStateOf(false) }
+    val transition = updateTransition(
+        targetState = onClickState
+    )
+    val scaleSize by transition.animateFloat(
+        transitionSpec = {
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        },
+        targetValueByState = { state ->
+            if (state) 1.09f else 1f
+        }
+    )
     FlowRow(
         modifier = modifier.fillMaxWidth(),
         maxItemsInEachRow = 3,
@@ -55,7 +80,9 @@ fun AirQualityBox(
         ) { listOfAirQuality ->
             listOfAirQuality.forEach { airQuality ->
                 ConstraintLayout(
-                    modifier = Modifier.size(87.dp)
+                    modifier = Modifier.size(87.dp).scale(scaleSize).clickable{
+                        onClickState=!onClickState
+                    }
                 ) {
                     val (glassBackground, content) = createRefs()
                     Box(
@@ -77,7 +104,7 @@ fun AirQualityBox(
                                 offsetX = 1.dp
                             )
                             .background(
-                                brush=Brush.verticalGradient(
+                                brush = Brush.verticalGradient(
                                     listOf(
                                         Color.White.copy(alpha = 0.95f),
                                         Color.White.copy(alpha = 0.05f)

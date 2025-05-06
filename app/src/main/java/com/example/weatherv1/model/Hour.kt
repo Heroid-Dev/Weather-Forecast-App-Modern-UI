@@ -19,7 +19,7 @@ data class Hour(
     val solarenergy: Double,
     val solarradiation: Double,
     val source: String,
-    val stations: List<String>,
+    val stations: Any,
     val temp: Double,
     val uvindex: Double,
     val visibility: Double,

@@ -1,5 +1,6 @@
 package com.example.weatherv1.repositorys
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherv1.model.Weather
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val weatherRepository: WeatherRepository
+    private val weatherRepository: WeatherRepository,
+    private val geographicalRepository: GeographicalRepository
 ) : ViewModel() {
 
     private val _weatherStateFlow = MutableStateFlow<RequestState<Weather>>(RequestState.Idle)
@@ -28,8 +30,24 @@ class MainViewModel @Inject constructor(
                 weatherRepository.getWeather(city = city).collect {
                     _weatherStateFlow.value = it
                 }
-            }catch (e: Exception){
-                _weatherStateFlow.value= RequestState.Error(e)
+            } catch (e: Exception) {
+                _weatherStateFlow.value = RequestState.Error(e)
+            }
+        }
+    }
+
+
+    private val _cityName = MutableStateFlow<String?>(null)
+    val cityName=_cityName.asStateFlow()
+
+    fun getCityNameFromApi(lat: Double, lon: Double) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val location = geographicalRepository.getGeographicalLocation(lat, lon)
+                Log.d("CITY", "getCityNameFromApi: ${location.toString()}")
+                _cityName.value = location.address.county
+            } catch (e: Exception) {
+                _cityName.value = e.message
             }
         }
     }
