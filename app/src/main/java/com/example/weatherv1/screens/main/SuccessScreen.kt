@@ -1,6 +1,7 @@
 package com.example.weatherv1.screens.main
 
 import android.icu.text.DateFormat
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -14,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,10 +29,13 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -38,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -46,15 +53,19 @@ import androidx.compose.ui.unit.dp
 import com.example.weatherv1.R
 import com.example.weatherv1.model.NavigationItem
 import com.example.weatherv1.model.Weather
+import com.example.weatherv1.repositorys.MainViewModel
+import com.example.weatherv1.utils.isInternetAvailable
 import com.example.weatherv1.widgets.InfiniteColorBackground
+import com.example.weatherv1.widgets.RequestState
 import com.example.weatherv1.widgets.TopAppBarComponent
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuccessScreen(
-    //weatherInfo: Weather,
     navigationToSearchScreen: () -> Unit,
     navigateToNextDayScreen: () -> Unit,
     navigateToAboutScreen: () -> Unit,
@@ -62,6 +73,7 @@ fun SuccessScreen(
     navigateToSettingScreen: () -> Unit,
     weatherInfo: Weather,
     cityName: String,
+    mainViewModel: MainViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var indexSelectedItem by remember { mutableIntStateOf(0) }
@@ -116,92 +128,127 @@ fun SuccessScreen(
             }
         }
     ) {
+
         SuccessScreenContent(
             cityName = cityName,
+            weatherInfo=weatherInfo,
             onSearchClicked = navigationToSearchScreen,
             onNextDayClicked = navigateToNextDayScreen,
             onMenuClicked = {
                 scope.launch {
                     drawerState.open()
                 }
-            }
+            },
+            mainViewModel = mainViewModel
         )
     }
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SuccessScreenContent(
     cityName: String,
+    weatherInfo: Weather,
     onSearchClicked: () -> Unit,
     onMenuClicked: () -> Unit,
     onNextDayClicked: () -> Unit,
+    mainViewModel: MainViewModel
 ) {
+
+    val refreshState = rememberPullToRefreshState()
+    var isRefreshing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val context= LocalContext.current
     InfiniteColorBackground(
         color1 = Color(0xFFEDFAFF),
         color2 = Color(0xFF9FD6FF),
         color3 = Color(0xFF5BBCFF),
         color4 = Color(0xFFEFF9FF)
     ) { color1, color2 ->
+
         Scaffold { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(color1, color2),
-                            start = Offset(0f, 0f),
-                            end = Offset.Infinite
-                        )
-                    )
-                    .padding(innerPadding)
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                state = refreshState,
+                onRefresh = {
+                    if (!isInternetAvailable(context)) {
+                        Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
+
+                    }else {
+                        isRefreshing = true
+                        mainViewModel.getWeather(city = weatherInfo.address, forceRefresh = true)
+                        mainViewModel.weatherStateFlow
+                            .onEach {
+                                if (it !is RequestState.Loading) {
+                                    isRefreshing = false
+                                }
+                            }
+                            .launchIn(scope)
+                    }
+                }
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = 10.dp, vertical = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    TopAppBarComponent(
-                        title = {
-                            LocationInfoText(city = cityName, localTime = 1744041917)
-                        },
-                        navigationIcon = R.drawable.menuicon,
-                        actionIcon = R.drawable.searchicon,
-                        onNavigationClicked = onMenuClicked,
-                        onActionClicked = onSearchClicked,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    )
-                    DailyForecast(
-                        //weatherInfo = weatherInfo
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        modifier = Modifier
-                            .background(
-                                color = Color(0x28FFFFFF), shape =
-                                    RoundedCornerShape(10.dp)
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(color1, color2),
+                                start = Offset(0f, 0f),
+                                end = Offset.Infinite
                             )
-                            .padding(5.dp)
-                            .basicMarquee(
-                                iterations = 1000,
-                                repeatDelayMillis = 1000,
+                        )
+                        .padding(innerPadding)
 
-                                ),
-                        text = "Similar temperatures continuing with a chance of rain tomorrow & Wednesday.",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFF234195)
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    AirQualityBox(
-                        modifier = Modifier.padding(horizontal = 40.dp)
-                        //weatherInfo = weatherInfo
-                    )
-                    HeaderHourlyForecast(
-                        modifier = Modifier.padding(top = 8.dp),
-                        onHeaderForecastClicked = onNextDayClicked
-                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp, vertical = 10.dp)
+                            .verticalScroll(state = rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TopAppBarComponent(
+                            title = {
+                                LocationInfoText(city = cityName, localTime = 1744041917)
+                            },
+                            navigationIcon = R.drawable.menuicon,
+                            actionIcon = R.drawable.searchicon,
+                            onNavigationClicked = onMenuClicked,
+                            onActionClicked = onSearchClicked,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        )
+                        DailyForecast(
+                            //weatherInfo = weatherInfo
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            modifier = Modifier
+                                .background(
+                                    color = Color(0x28FFFFFF), shape =
+                                        RoundedCornerShape(10.dp)
+                                )
+                                .padding(5.dp)
+                                .basicMarquee(
+                                    iterations = 1000,
+                                    repeatDelayMillis = 1000,
+
+                                    ),
+                            text = "Similar temperatures continuing with a chance of rain tomorrow & Wednesday.",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color(0xFF234195)
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        AirQualityBox(
+                            modifier = Modifier.padding(horizontal = 40.dp)
+                            //weatherInfo = weatherInfo
+                        )
+                        HeaderHourlyForecast(
+                            modifier = Modifier.padding(top = 8.dp),
+                            onHeaderForecastClicked = onNextDayClicked
+                        )
+                    }
+                    HourlyForecast()
                 }
-                HourlyForecast()
             }
         }
     }
@@ -245,6 +292,7 @@ fun LocationInfoText(
         )
     }
 }
+
 
 //@Preview
 //@Composable

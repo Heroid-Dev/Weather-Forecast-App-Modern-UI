@@ -39,7 +39,9 @@ fun WeatherNavigation(
             mainViewModel = mainViewModel,
             navigateToMainScreen = screen.mainScreen
         )
-        searchComposable(navigateToMainScreen = screen.mainScreen)
+        searchComposable(
+            mainViewModel = mainViewModel,
+            navigateToMainScreen = screen.mainScreen)
         aboutComposable()
         settingComposable(navigateToMainScreen = screen.mainScreen)
         favoriteComposable()

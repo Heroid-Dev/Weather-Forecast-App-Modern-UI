@@ -6,21 +6,10 @@ sealed class RequestState<out T> {
     data object Idle : RequestState<Nothing>()
     data object Loading : RequestState<Nothing>()
     data class Success<T>(val data: T) : RequestState<T>()
-    data class Error(val error: Throwable) : RequestState<Nothing>()
+    data class Error(val error: Exception) : RequestState<Nothing>()
 
-    fun getDataOrNull(): T? =
-        try {
-            (this as Success).data
-        } catch (e: Exception) {
-            null
-        }
-
-    fun getErrorOrNull(): Throwable? =
-        try {
-            (this as Error).error
-        } catch (e: Exception) {
-            null
-        }
+    fun getDataOrNull(): T? = (this as? Success)?.data
+    fun getErrorOrNull(): Exception? = (this as? Error)?.error
 
     @Composable
     fun DisplayResult(

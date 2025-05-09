@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,7 +28,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.weatherv1.R
 
 @Composable
-fun ErrorScreen() {
+fun ErrorScreen(error: Exception) {
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("connectionlost.json"))
     val progress by animateLottieCompositionAsState(
         composition = composition,
@@ -54,7 +52,7 @@ fun ErrorScreen() {
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(
-                    text = " 500 Internal Server Error",
+                    text =error.localizedMessage!!,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF00409C))
@@ -66,5 +64,5 @@ fun ErrorScreen() {
 @Preview
 @Composable
 private fun ErrorScreenPreview() {
-    ErrorScreen()
+    ErrorScreen(error = Exception())
 }

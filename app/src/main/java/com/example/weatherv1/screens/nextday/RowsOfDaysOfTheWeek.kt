@@ -63,7 +63,7 @@ fun RowsOfDaysOfTheWeek() {
         ),
         InfoDay(
             day = "Tuesday",
-            icon = R.drawable.img_thunder,
+            icon = R.drawable.img_cloud,
             conditions = "Thunderstorm",
             maxTemp = 24,
             minTemp = 16

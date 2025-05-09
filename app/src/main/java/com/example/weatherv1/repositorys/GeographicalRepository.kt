@@ -1,7 +1,7 @@
 package com.example.weatherv1.repositorys
 
 import com.example.weatherv1.model.GeographicalLocation
-import com.example.weatherv1.nertwork.GeographicalApi
+import com.example.weatherv1.data.remote.GeographicalApi
 import javax.inject.Inject
 
 class GeographicalRepository @Inject constructor(

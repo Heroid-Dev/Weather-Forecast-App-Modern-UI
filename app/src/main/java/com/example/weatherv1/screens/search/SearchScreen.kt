@@ -1,5 +1,6 @@
 package com.example.weatherv1.screens.search
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
@@ -21,10 +22,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,20 +36,34 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.weatherv1.repositorys.MainViewModel
+import com.example.weatherv1.utils.getWeatherIconFromCondition
+import com.example.weatherv1.utils.isInternetAvailable
 import com.example.weatherv1.widgets.BelowBackground
 import com.example.weatherv1.widgets.InfiniteColorBackground
+import com.example.weatherv1.widgets.RequestState
 import com.example.weatherv1.widgets.WeatherCard
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchScreen(
-    navigateToMainScreen: () -> Unit = {}
+    mainViewModel: MainViewModel,
+    navigateToMainScreen: () -> Unit = {},
 ) {
-    var cityFoundedState by remember { mutableStateOf(false) }
-    var searchText by remember { mutableStateOf("") }
-    val searchTriggered = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val weatherState = mainViewModel.weatherStateFlow.collectAsState().value
+    var isLoading by remember { mutableStateOf(false) }
 
+    var searchText by remember { mutableStateOf("") }
+
+
+    val searchTriggered = remember { mutableStateOf(false) }
     val transitionCard = updateTransition(
         targetState = searchTriggered.value
     )
@@ -67,7 +85,6 @@ fun SearchScreen(
         color4 = Color(0xFF5BBCFF),
     ) { color1, color2 ->
 
-
         BelowBackground(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,10 +102,10 @@ fun SearchScreen(
                 onClickBackButton = navigateToMainScreen
             )
         }
-
-
         Box(
-            modifier = Modifier.fillMaxSize().background(Color.Transparent),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -100,6 +117,7 @@ fun SearchScreen(
             ) {
 
                 SearchTextField(
+                    modifier = Modifier.offset(y = textFieldOffsetY),
                     searchText = searchText,
                     onValueChange = {
                         searchText = it
@@ -108,26 +126,87 @@ fun SearchScreen(
                         }
                     },
                     onSearch = {
-                        searchTriggered.value = true
-                        cityFoundedState = true
-                    },
-                    modifier = Modifier.offset(y = textFieldOffsetY)
-                )
+                        if (!isInternetAvailable(context)) {
+                            Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT)
+                                .show()
+                            return@SearchTextField
+                        }
+                        isLoading = true
+                        mainViewModel.getWeather(city = searchText, forceRefresh = true)
+                        scope.launch {
+                            mainViewModel.weatherStateFlow.collectLatest { state ->
+                                when (state) {
+                                    is RequestState.Success -> {
+                                        isLoading = false
+                                        if (state.data.address.contains(
+                                                searchText,
+                                                ignoreCase = true
+                                            )
+                                        ) {
+                                            searchTriggered.value = true
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "The corresponding city was not found.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            searchTriggered.value = false
+                                        }
+                                    }
 
-                AnimatedVisibility(
-                    visible = searchTriggered.value
-                ) {
-                    WeatherCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(280.dp)
-                            .animateEnterExit(
-                                enter = slideInVertically(animationSpec = tween(1000),initialOffsetY = { it }) + fadeIn(),
-                                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-                            )
+                                    is RequestState.Error -> {
+                                        isLoading = false
+                                        Toast.makeText(
+                                            context,
+                                            "Error receiving information.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        searchTriggered.value = false
+                                    }
+
+                                    else -> {}
+                                }
+                            }
+                        }
+                    },
+
+                    )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(top = 16.dp),
+                        color = color1,
                     )
                 }
-
+                AnimatedVisibility(
+                    visible = searchTriggered.value && weatherState is RequestState.Success
+                ) {
+                    val weather = weatherState.getDataOrNull()
+                    weather?.let {
+                        WeatherCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(280.dp)
+                                .animateEnterExit(
+                                    enter = slideInVertically(
+                                        animationSpec = tween(1000),
+                                        initialOffsetY = { it }) + fadeIn(),
+                                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                                ),
+                            onCardClicked = {
+                                mainViewModel.updateCurrentCity(weather.address)
+                                navigateToMainScreen()
+                            },
+                            weatherImage = getWeatherIconFromCondition(it.days.first().icon), // این تابعو باید بنویسی
+                            time = "Today",
+                            maxTemp = it.days.first().tempmax.toInt(),
+                            minTemp = it.days.first().tempmin.toInt(),
+                            status = it.days.first().conditions,
+                            humidity = it.days.first().humidity.toInt(),
+                            Precipitation = it.days.first().precipprob.toInt(),
+                            Wind = it.days.first().windspeed.toInt()
+                        )
+                    }
+                }
 
             }
         }
@@ -135,12 +214,8 @@ fun SearchScreen(
 }
 
 
-
-
-
-
 @Preview(showBackground = true)
 @Composable
 private fun SearchScreenPreview() {
-    SearchScreen()
+    SearchScreen(mainViewModel = hiltViewModel())
 }

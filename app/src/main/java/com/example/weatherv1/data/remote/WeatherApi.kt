@@ -1,4 +1,4 @@
-package com.example.weatherv1.nertwork
+package com.example.weatherv1.data.remote
 
 
 import com.example.weatherv1.model.Weather

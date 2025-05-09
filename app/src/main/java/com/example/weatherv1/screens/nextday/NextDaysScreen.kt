@@ -49,7 +49,7 @@ fun NextDaysScreen(navigateToMainScreen: () -> Unit) {
                 .padding(horizontal = 18.dp)
                 .fillMaxWidth()
         ) {
-            WeatherCard(modifier = Modifier.fillMaxWidth().height(350.dp).padding(top = 100.dp))
+            WeatherCard(modifier = Modifier.fillMaxWidth().height(350.dp).padding(top = 100.dp), onCardClicked = {})
             HeaderDaysOfTheWeek(text="EveryDays")
             RowsOfDaysOfTheWeek()
         }

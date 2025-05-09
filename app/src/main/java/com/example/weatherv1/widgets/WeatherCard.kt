@@ -3,6 +3,7 @@ package com.example.weatherv1.widgets
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.weatherv1.R
@@ -29,6 +31,7 @@ import com.example.weatherv1.utils.customShadow
 @Composable
 fun WeatherCard(
     modifier: Modifier= Modifier,
+    onCardClicked:()-> Unit,
     @DrawableRes weatherImage: Int=R.drawable.img_rain,
     time: String="Tomorrow",
     maxTemp:Int=23,
@@ -66,6 +69,9 @@ fun WeatherCard(
                         bottom = parent.bottom,
                         topMargin = 50.dp
                     )
+                }
+                .clickable{
+                    onCardClicked()
                 }
         )
 
@@ -146,4 +152,13 @@ fun WeatherCard(
         }
     }
 
+}
+
+
+@Preview
+@Composable
+private fun WeatherCardPreview() {
+    WeatherCard(
+        onCardClicked = {}
+    )
 }

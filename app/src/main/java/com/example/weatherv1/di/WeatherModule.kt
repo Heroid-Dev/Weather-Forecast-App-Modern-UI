@@ -1,6 +1,6 @@
 package com.example.weatherv1.di
 
-import com.example.weatherv1.nertwork.WeatherApi
+import com.example.weatherv1.data.remote.WeatherApi
 import com.example.weatherv1.utils.Constants
 import dagger.Module
 import dagger.Provides

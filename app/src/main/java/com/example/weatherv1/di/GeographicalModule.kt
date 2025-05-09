@@ -1,6 +1,6 @@
 package com.example.weatherv1.di
 
-import com.example.weatherv1.nertwork.GeographicalApi
+import com.example.weatherv1.data.remote.GeographicalApi
 import com.example.weatherv1.utils.Constants.NOMINATION_API_URL
 import dagger.Module
 import dagger.Provides

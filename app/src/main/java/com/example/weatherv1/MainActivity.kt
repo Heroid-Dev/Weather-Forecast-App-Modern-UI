@@ -18,10 +18,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen().apply {
             setKeepOnScreenCondition { false }
         }
-
-
         super.onCreate(savedInstanceState)
-
         enableEdgeToEdge()
         setContent {
             WeatherV1Theme {
