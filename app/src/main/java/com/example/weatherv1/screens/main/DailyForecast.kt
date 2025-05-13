@@ -1,5 +1,6 @@
 package com.example.weatherv1.screens.main
 
+import android.icu.text.DateFormat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -21,21 +23,26 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.example.weatherv1.R
+import com.example.weatherv1.model.Hour
+import com.example.weatherv1.repositorys.MainViewModel
 import com.example.weatherv1.ui.theme.ColorSurface
+import com.example.weatherv1.utils.celsiusToFahrenheit
 import com.example.weatherv1.utils.customShadow
+import com.example.weatherv1.utils.getWeatherIconFromCondition
+import java.util.Date
 
 
 @Composable
 fun DailyForecast(
     modifier: Modifier = Modifier,
-    // weatherInfo: Weather
+    nowWeather: Hour,
+    mainViewModel: MainViewModel,
 ) {
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth(.67f)
@@ -45,7 +52,7 @@ fun DailyForecast(
             forecastImage,
             forecastValue,
             description,
-            background
+            background,
         ) = createRefs()
 
         CardBackground(
@@ -55,48 +62,56 @@ fun DailyForecast(
                     end = parent.end,
                     top = parent.top,
                     bottom = parent.bottom,
-                    topMargin = 25.dp,//25.dp
+                    topMargin = 25.dp,
                 )
                 height = Dimension.fillToConstraints
             }
         )
-
         Image(
-            painter = painterResource(id = R.drawable.img_sub_rain),
-            contentDescription = null,
+            painter = painterResource(id = getWeatherIconFromCondition(condition = nowWeather.icon)),
+            contentDescription = "forecast card icon",
             contentScale = ContentScale.FillHeight,
             modifier = Modifier
-                .height(174.dp)//174.dp
+                .height(174.dp)
                 .constrainAs(forecastImage) {
                     start.linkTo(anchor = parent.start)
                     top.linkTo(anchor = parent.top)
-                    end.linkTo(anchor = parent.end, margin = 15.dp)
+                    end.linkTo(anchor = parent.end)
                 }
         )
 
-        ForecastValue(modifier = Modifier.constrainAs(forecastValue) {
-            top.linkTo(anchor = forecastImage.bottom)
-            bottom.linkTo(anchor = description.top)
-            start.linkTo(anchor = parent.start, margin = 15.dp)
-            end.linkTo(anchor = parent.end)
-        })
+        ForecastValue(
+            temp = if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
+                "%.2f".format(celsiusToFahrenheit(nowWeather.temp)) + "F"
+            else
+                "${nowWeather.temp.toInt()}°",
+            modifier = Modifier.constrainAs(forecastValue) {
+                top.linkTo(anchor = forecastImage.bottom)
+                bottom.linkTo(anchor = description.top)
+                start.linkTo(anchor = parent.start, margin = 15.dp)
+                end.linkTo(anchor = parent.end)
+            })
 
-        ForecastDescription(modifier = Modifier.constrainAs(description) {
-            start.linkTo(anchor = parent.start)
-            end.linkTo(anchor = parent.end)
-            top.linkTo(anchor = forecastValue.bottom)
-        })
+        ForecastDescription(
+            conditions = nowWeather.conditions,
+            datetimeEpoch = nowWeather.datetimeEpoch.toLong(),
+            modifier = Modifier.constrainAs(description) {
+                start.linkTo(anchor = parent.start)
+                end.linkTo(anchor = parent.end)
+                top.linkTo(anchor = forecastValue.bottom)
+                bottom.linkTo(anchor = parent.bottom, margin = 20.dp)
+            })
     }
 }
 
 @Composable
-fun ForecastValue(modifier: Modifier) {
+fun ForecastValue(modifier: Modifier, temp: String) {
     Column(
         modifier = modifier
     ) {
         Text(
-            text = "26°",
-            fontSize = 80.sp,
+            text = temp,
+            fontSize = 70.sp,
             style = TextStyle(
                 brush = Brush.linearGradient(
                     .3f to Color.White,
@@ -110,19 +125,25 @@ fun ForecastValue(modifier: Modifier) {
 
 
 @Composable
-fun ForecastDescription(modifier: Modifier = Modifier) {
+fun ForecastDescription(
+    modifier: Modifier = Modifier,
+    conditions: String,
+    datetimeEpoch: Long,
+) {
+    val dateFormat = DateFormat.getDateInstance(DateFormat.ERA_FIELD)
+    val formatted = dateFormat.format(Date(datetimeEpoch * 1000))
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Rain Showers",
+            text = conditions,
             color = ColorSurface,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Monday,12 Feb",
+            text = formatted,
             color = ColorSurface,
             style = MaterialTheme.typography.bodyMedium
         )
@@ -146,12 +167,9 @@ fun CardBackground(modifier: Modifier = Modifier) {
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0x977F82FF), // شفاف‌تر شده
+                        Color(0x977F82FF),
                         Color(0xA85BBCFF),
-                        Color(0xD8C5E5FF),
-                        //Color(0xCC7F82FF), // شفاف‌تر شده
-                        //Color(0xBB5BBCFF),
-                        //Color(0xFFC5E5FF),
+                        Color(0xD8C5E5FF)
                     )
                 )
             )
@@ -159,10 +177,3 @@ fun CardBackground(modifier: Modifier = Modifier) {
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun DailyForecastPreview() {
-    DailyForecast(
-        //weatherInfo = weatherInfo
-    )
-}

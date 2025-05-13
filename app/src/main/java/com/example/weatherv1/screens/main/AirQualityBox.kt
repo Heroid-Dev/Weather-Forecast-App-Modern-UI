@@ -30,11 +30,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.weatherv1.model.AirQualityDataList
+import com.example.weatherv1.model.Hour
+import com.example.weatherv1.repositorys.MainViewModel
 import com.example.weatherv1.utils.customShadow
 
 
@@ -42,13 +43,11 @@ import com.example.weatherv1.utils.customShadow
 @Composable
 fun AirQualityBox(
     modifier: Modifier = Modifier,
-    temp: Int = 0,
-    precip: Int = 0,
-    humidity: Int = 0,
-    pressure: Int = 0,
-    unIndex: Int = 0,
-    wind: Int = 0
+    nowWeather: Hour,
+    mainViewModel: MainViewModel
 ) {
+
+
     var onClickState by remember { mutableStateOf(false) }
     val transition = updateTransition(
         targetState = onClickState
@@ -71,12 +70,14 @@ fun AirQualityBox(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         AirQualityDataList(
-            rainProb = 51.6,
-            temp = 17.2,
-            wind = 25.2,
-            uvIndex = 9.0,
-            humidity = 49.3,
-            pressure = 1007.5
+            mainViewModel=mainViewModel,
+            rainProb = nowWeather.precipprob,
+            rain=nowWeather.precip,
+            temp = nowWeather.temp,
+            wind = nowWeather.windspeed,
+            uvIndex = nowWeather.uvindex,
+            humidity = nowWeather.humidity,
+            pressure = nowWeather.pressure
         ) { listOfAirQuality ->
             listOfAirQuality.forEach { airQuality ->
                 ConstraintLayout(
@@ -147,8 +148,3 @@ fun AirQualityBox(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF5BBCFF)
-@Composable
-private fun AirQualityPreview() {
-    AirQualityBox()
-}

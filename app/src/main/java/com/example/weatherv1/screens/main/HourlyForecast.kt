@@ -1,6 +1,5 @@
 package com.example.weatherv1.screens.main
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,22 +25,14 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.weatherv1.R
+import com.example.weatherv1.model.Hour
 import com.example.weatherv1.utils.customShadow
+import com.example.weatherv1.utils.getWeatherIconFromCondition
 
 
 @Composable
-fun HourlyForecast() {
-
-    val hourlyForecast = listOf(
-        HourlyWeather("15:00", 26.0, R.drawable.sunny_hourly, 75.0),
-        HourlyWeather("16:00", 25.0, R.drawable.rain_hourly, 40.0),
-        HourlyWeather("17:00", 24.0, R.drawable.sunny_hourly, 40.0),
-        HourlyWeather("18:00", 23.0, R.drawable.half_cloudy_hourly, 40.0),
-        HourlyWeather("19:00", 22.0, R.drawable.cloud_hourly, 10.0)
-    )
+fun HourlyForecast(listOfHour: List<Hour>) {
 
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
@@ -49,7 +40,7 @@ fun HourlyForecast() {
         contentPadding = PaddingValues(horizontal = 10.dp)
     ) {
         items(
-            items = hourlyForecast,
+            items = listOfHour,
 
         ) {hourlyWeather->
             HourlyForecastItem(hourlyWeather)
@@ -58,7 +49,7 @@ fun HourlyForecast() {
 }
 
 @Composable
-fun HourlyForecastItem(hourlyWeather: HourlyWeather) {
+fun HourlyForecastItem(hourlyWeather: Hour) {
     Box(
         modifier = Modifier.padding(horizontal = 5.dp).width(80.dp).height(110.dp)
             .customShadow(
@@ -84,10 +75,10 @@ fun HourlyForecastItem(hourlyWeather: HourlyWeather) {
             .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceAround) {
-            Text(text=hourlyWeather.hour, color = Color.White, fontWeight = FontWeight.Medium)
-            Image(painter = painterResource(hourlyWeather.iconRes), contentDescription = null,
+            Text(text=hourlyWeather.datetime.removeSuffix(":00"), color = Color.White, fontWeight = FontWeight.Medium)
+            Image(painter = painterResource(getWeatherIconFromCondition(hourlyWeather.icon)), contentDescription = null,
                 modifier = Modifier.size(40.dp))
-            Text(text="${hourlyWeather.temperature.toInt()}°",
+            Text(text="${hourlyWeather.temp.toInt()}°",
                 style = TextStyle(
                     brush = Brush.linearGradient(
                         .3f to Color.White,
@@ -101,15 +92,3 @@ fun HourlyForecastItem(hourlyWeather: HourlyWeather) {
     }
 }
 
-data class HourlyWeather(
-    val hour: String,
-    val temperature: Double,
-    @DrawableRes val iconRes: Int,
-    val precipProb: Double
-)
-
-@Preview(backgroundColor = 0xFF91F1FF, showBackground = true)
-@Composable
-private fun HourlyForecastPreview() {
-    HourlyForecast()
-}

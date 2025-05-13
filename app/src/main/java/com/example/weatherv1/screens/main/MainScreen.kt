@@ -64,6 +64,7 @@ fun MainScreen(
             )
         }
     }
+
 }
 
 @Composable
@@ -113,7 +114,6 @@ fun MainScreenContent(
     val context = LocalContext.current
     val cityName = mainViewModel.currentCity.collectAsState().value
     val weatherState = mainViewModel.weatherStateFlow.collectAsState().value
-
 
     LaunchedEffect(cityName) {
         if (cityName==null){

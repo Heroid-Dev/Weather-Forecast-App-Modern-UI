@@ -16,7 +16,7 @@ val Context.cityPreferences by preferencesDataStore("city-preferences")
 class CityNameDataStore @Inject constructor(
     private val context: Context
 ) {
-    val cityPreferences = context.cityPreferences
+    private val cityPreferences = context.cityPreferences
 
     companion object PreferencesKeys{
         val CITY_NAME = stringPreferencesKey("city_name")
@@ -37,3 +37,8 @@ class CityNameDataStore @Inject constructor(
     }
 
 }
+
+data class CityData(
+    val cityName: String,
+    val road: String
+)

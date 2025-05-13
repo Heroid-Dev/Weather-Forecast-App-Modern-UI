@@ -1,5 +1,9 @@
 package com.example.weatherv1.screens.setting
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +21,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,25 +29,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.weatherv1.R
+import com.example.weatherv1.repositorys.MainViewModel
 import com.example.weatherv1.utils.customShadow
 import com.example.weatherv1.widgets.InfiniteColorBackground
 import com.example.weatherv1.widgets.TopAppBarComponent
 
 @Composable
 fun SettingScreen(
-    navigateToMainScreen:()-> Unit
+    navigateToMainScreen: () -> Unit,
+    mainViewModel: MainViewModel,
 ) {
-    val toggleState1 = remember { mutableStateOf(true) }
-    val toggleState2 = remember { mutableStateOf(true) }
-    val toggleState3 = remember { mutableStateOf(true) }
-    val notificationsEnabled = remember { mutableStateOf(true) }
+    val unitPref = mainViewModel.unitPrefs.collectAsState().value
 
+    var toggleState1 = remember { mutableStateOf(unitPref.isFahrenheit) }
+    var toggleState2 = remember { mutableStateOf(unitPref.isMph) }
+    var toggleState3 = remember { mutableStateOf(unitPref.inKPa) }
+    var toggleState4 = remember { mutableStateOf(unitPref.inRain_mm) }
+
+    var notificationsEnabled = mainViewModel.notificationEnabled.collectAsState().value
+
+    val context= LocalContext.current
+    val permissionLauncher= rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {isGranted->
+            if (!isGranted){
+                mainViewModel.updateNotificationEnabled(false)
+            }else{
+                mainViewModel.updateNotificationEnabled(true)
+            }
+        }
+    )
     InfiniteColorBackground(
         color1 = Color(0xFFEDFAFF),
         color2 = Color(0xFF9FD6FF),
@@ -54,7 +79,7 @@ fun SettingScreen(
                 .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(
-                        listOf(color1,color2),
+                        listOf(color1, color2),
                         start = Offset(0f, 0f),
                         end = Offset.Infinite
                     )
@@ -84,22 +109,52 @@ fun SettingScreen(
             ) {
 
                 SettingsCard(title = "Units") {
-                    ToggleRow("Temperature", toggleState1.value,"fahrenheit") {
+                    ToggleRow("Temperature", toggleState1.value, "Fahrenheit") {
                         toggleState1.value = it
+                        mainViewModel.updateUnits(
+                            unitPref.copy(isFahrenheit = it)
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    ToggleRow("Wind Speed", toggleState2.value, "Kilometers per hour") {
+                    ToggleRow("Wind Speed", toggleState2.value, "Miles per hour") {
                         toggleState2.value = it
+                        mainViewModel.updateUnits(
+                            unitPref.copy(isMph = it)
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    ToggleRow("Air Pressure", toggleState3.value, "Inch of mercury") {
+                    ToggleRow("Air Pressure", toggleState3.value, "Kilopascal") {
                         toggleState3.value = it
+                        mainViewModel.updateUnits(
+                            unitPref.copy(inKPa = it)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    ToggleRow("Precipitation", toggleState4.value, "Millimeters") {
+                        toggleState4.value = it
+                        mainViewModel.updateUnits(
+                            unitPref.copy(inRain_mm = it)
+                        )
                     }
                 }
 
                 SettingsCard(title = "Notifications") {
-                    ToggleRow("Notification", notificationsEnabled.value) {
-                        notificationsEnabled.value = it
+                    ToggleRow("Notification", notificationsEnabled) {isChecked->
+                        if (isChecked) {
+                            val hasPermission =
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                ) == PackageManager.PERMISSION_GRANTED
+
+                            if (!hasPermission) {
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                mainViewModel.updateNotificationEnabled(true)
+                            }
+                        } else {
+                            mainViewModel.updateNotificationEnabled(false)
+                        }
                     }
                 }
 
@@ -169,7 +224,7 @@ fun ToggleRow(
                 uncheckedThumbColor = Color.White,
                 checkedTrackColor = Color(0xFF90CAF9),
                 uncheckedTrackColor = Color(0xFFC9E3FF),
-                uncheckedBorderColor=Color.Transparent
+                uncheckedBorderColor = Color.Transparent
             )
         )
     }
@@ -193,5 +248,5 @@ fun ClickableRow(label: String) {
 @Preview(showBackground = true)
 @Composable
 private fun SettingScreenPreview() {
-    SettingScreen(){}
+    SettingScreen(mainViewModel = hiltViewModel(), navigateToMainScreen = {})
 }

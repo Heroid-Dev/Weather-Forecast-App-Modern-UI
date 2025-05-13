@@ -33,9 +33,19 @@ fun celsiusToFahrenheit(celsius: Double): Double {
 fun kmhToMph(kmh: Double): Double {
     return kmh * 0.621371
 }
-fun mbToInHg(mb: Double): Double {
-    return mb * 0.0295301
+fun millibarToKilopascal(millibar: Double): Double {
+    return millibar * 0.1
 }
-fun mmToInches(mm: Double): Double {
-    return mm * 0.0393701
+
+fun categorizeUVIndex(uvIndex: Double): String {
+    return when {
+        uvIndex < 0 -> "Invalid"
+        uvIndex <= 2 -> "Low"
+        uvIndex <= 5 -> "Moderate"
+        uvIndex <= 7 -> "High"
+        uvIndex <= 10 -> "Very High"
+        else -> "Extreme"
+    }
 }
+
+

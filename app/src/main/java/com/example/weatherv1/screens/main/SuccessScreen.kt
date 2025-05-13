@@ -33,6 +33,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.weatherv1.R
 import com.example.weatherv1.model.NavigationItem
@@ -58,9 +60,14 @@ import com.example.weatherv1.utils.isInternetAvailable
 import com.example.weatherv1.widgets.InfiniteColorBackground
 import com.example.weatherv1.widgets.RequestState
 import com.example.weatherv1.widgets.TopAppBarComponent
+import com.example.weatherv1.widgets.cancelNotification
+import com.example.weatherv1.widgets.showNotification
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -160,6 +167,24 @@ private fun SuccessScreenContent(
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context= LocalContext.current
+
+    val currentTime= LocalTime.now().hour
+    val today= LocalDate.now()
+    val formattedDate=today.format(DateTimeFormatter.ISO_DATE)
+
+    val nowDayWeather= weatherInfo.days.first {
+        it.datetime == formattedDate
+    }
+    val nowHourlyWeather =nowDayWeather.hours.first {
+        it.datetime.substringBefore(":").toInt() == currentTime
+    }
+
+    val notificationEnabled=mainViewModel.notificationEnabled.collectAsState().value
+    if (notificationEnabled){
+        showNotification(context,"${nowDayWeather.conditions} in $cityName",nowDayWeather.description)
+    }else{
+        cancelNotification(context)
+    }
     InfiniteColorBackground(
         color1 = Color(0xFFEDFAFF),
         color2 = Color(0xFF9FD6FF),
@@ -209,7 +234,7 @@ private fun SuccessScreenContent(
                     ) {
                         TopAppBarComponent(
                             title = {
-                                LocationInfoText(city = cityName, localTime = 1744041917)
+                                LocationInfoText(city = cityName, localTime = nowHourlyWeather.datetimeEpoch.toLong())
                             },
                             navigationIcon = R.drawable.menuicon,
                             actionIcon = R.drawable.searchicon,
@@ -218,11 +243,13 @@ private fun SuccessScreenContent(
                             horizontalArrangement = Arrangement.SpaceBetween
                         )
                         DailyForecast(
-                            //weatherInfo = weatherInfo
+                            mainViewModel= mainViewModel,
+                            nowWeather = nowHourlyWeather
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .background(
                                     color = Color(0x28FFFFFF), shape =
                                         RoundedCornerShape(10.dp)
@@ -230,24 +257,28 @@ private fun SuccessScreenContent(
                                 .padding(5.dp)
                                 .basicMarquee(
                                     iterations = 1000,
-                                    repeatDelayMillis = 1000,
-
-                                    ),
-                            text = "Similar temperatures continuing with a chance of rain tomorrow & Wednesday.",
+                                    repeatDelayMillis = 500,
+                                ),
+                            text = "${nowDayWeather.description}           ".repeat(5),
                             style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF234195)
+                            color = Color(0xFF234195),
+                            maxLines = 1,
+                            overflow = TextOverflow.Visible
                         )
                         Spacer(modifier = Modifier.height(5.dp))
                         AirQualityBox(
-                            modifier = Modifier.padding(horizontal = 40.dp)
-                            //weatherInfo = weatherInfo
+                            modifier = Modifier.padding(horizontal = 40.dp),
+                            nowWeather=nowHourlyWeather,
+                            mainViewModel=mainViewModel
                         )
                         HeaderHourlyForecast(
                             modifier = Modifier.padding(top = 8.dp),
                             onHeaderForecastClicked = onNextDayClicked
                         )
                     }
-                    HourlyForecast()
+                    HourlyForecast(listOfHour=nowDayWeather.hours.filter {
+                        it.datetime.substringBefore(":").toInt() >= currentTime
+                    })
                 }
             }
         }
