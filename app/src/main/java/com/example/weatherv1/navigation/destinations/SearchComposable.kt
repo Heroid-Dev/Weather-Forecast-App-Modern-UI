@@ -9,7 +9,7 @@ import com.example.weatherv1.screens.search.SearchScreen
 fun NavGraphBuilder.searchComposable(
     mainViewModel: MainViewModel,
     navigateToMainScreen:()-> Unit){
-    composable(Screen.SearchScreen.name) {
+    composable(route=Screen.SearchScreen.name) {
         SearchScreen(
             mainViewModel = mainViewModel,
             navigateToMainScreen=navigateToMainScreen)

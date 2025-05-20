@@ -1,6 +1,7 @@
 package com.example.weatherv1.navigation
 
 import androidx.navigation.NavHostController
+import com.example.weatherv1.model.Day
 
 class NavScreen(
     navController: NavHostController
@@ -28,5 +29,4 @@ class NavScreen(
     val aboutScreen:()-> Unit={
         navController.navigate(Screen.AboutScreen.name)
     }
-
 }

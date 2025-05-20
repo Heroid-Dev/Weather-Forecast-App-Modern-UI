@@ -56,6 +56,8 @@ import com.example.weatherv1.R
 import com.example.weatherv1.model.NavigationItem
 import com.example.weatherv1.model.Weather
 import com.example.weatherv1.repositorys.MainViewModel
+import com.example.weatherv1.utils.celsiusToFahrenheit
+import com.example.weatherv1.utils.getWeatherNotificationIcon
 import com.example.weatherv1.utils.isInternetAvailable
 import com.example.weatherv1.widgets.InfiniteColorBackground
 import com.example.weatherv1.widgets.RequestState
@@ -178,10 +180,18 @@ private fun SuccessScreenContent(
     val nowHourlyWeather =nowDayWeather.hours.first {
         it.datetime.substringBefore(":").toInt() == currentTime
     }
-
+    val tempMin=if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
+        "${celsiusToFahrenheit(nowDayWeather.tempmin).toInt()}F"
+    else
+        "${nowDayWeather.tempmin.toInt()}°"
+    val tempMax=if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
+        "${celsiusToFahrenheit(nowDayWeather.tempmax)}F"
+    else
+        "${nowDayWeather.tempmax.toInt()}°"
+    val descriptionNews="${nowDayWeather.description}Highs $tempMax and lows $tempMin."
     val notificationEnabled=mainViewModel.notificationEnabled.collectAsState().value
     if (notificationEnabled){
-        showNotification(context,"${nowDayWeather.conditions} in $cityName",nowDayWeather.description)
+        showNotification(context,"${nowHourlyWeather.conditions} in $cityName",descriptionNews,getWeatherNotificationIcon(nowHourlyWeather.icon))
     }else{
         cancelNotification(context)
     }
@@ -191,7 +201,6 @@ private fun SuccessScreenContent(
         color3 = Color(0xFF5BBCFF),
         color4 = Color(0xFFEFF9FF)
     ) { color1, color2 ->
-
         Scaffold { innerPadding ->
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
@@ -202,7 +211,7 @@ private fun SuccessScreenContent(
 
                     }else {
                         isRefreshing = true
-                        mainViewModel.getWeather(city = weatherInfo.address, forceRefresh = true)
+                        mainViewModel.getWeather(city = weatherInfo.address, forceRefresh = true,isLoading=true)
                         mainViewModel.weatherStateFlow
                             .onEach {
                                 if (it !is RequestState.Loading) {
@@ -247,6 +256,7 @@ private fun SuccessScreenContent(
                             nowWeather = nowHourlyWeather
                         )
                         Spacer(modifier = Modifier.height(16.dp))
+
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -257,9 +267,9 @@ private fun SuccessScreenContent(
                                 .padding(5.dp)
                                 .basicMarquee(
                                     iterations = 1000,
-                                    repeatDelayMillis = 500,
+                                    repeatDelayMillis = 1000,
                                 ),
-                            text = "${nowDayWeather.description}           ".repeat(5),
+                            text = "$descriptionNews    ".repeat(2),
                             style = MaterialTheme.typography.labelMedium,
                             color = Color(0xFF234195),
                             maxLines = 1,
@@ -271,6 +281,7 @@ private fun SuccessScreenContent(
                             nowWeather=nowHourlyWeather,
                             mainViewModel=mainViewModel
                         )
+
                         HeaderHourlyForecast(
                             modifier = Modifier.padding(top = 8.dp),
                             onHeaderForecastClicked = onNextDayClicked
@@ -278,7 +289,7 @@ private fun SuccessScreenContent(
                     }
                     HourlyForecast(listOfHour=nowDayWeather.hours.filter {
                         it.datetime.substringBefore(":").toInt() >= currentTime
-                    })
+                    },mainViewModel=mainViewModel)
                 }
             }
         }
@@ -324,14 +335,3 @@ fun LocationInfoText(
     }
 }
 
-
-//@Preview
-//@Composable
-//private fun SuccessScreenPreview() {
-//    SuccessScreen(
-//        navigationToSearchScreen = {},
-//        navigateToNextDayScreen = {},
-//        weatherInfo = Weather,
-//        cityName = ""
-//    )
-//}

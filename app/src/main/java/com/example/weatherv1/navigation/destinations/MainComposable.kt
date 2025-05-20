@@ -1,5 +1,7 @@
 package com.example.weatherv1.navigation.destinations
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.example.weatherv1.navigation.Screen
@@ -15,11 +17,10 @@ fun NavGraphBuilder.mainComposable(
     navigateToFavoriteScreen: () -> Unit,
     navigateToSettingScreen: () -> Unit,
 ) {
-    composable(Screen.MainScreen.name) {
-//        LaunchedEffect(true) {
-//            mainViewModel.getWeather(city = "Tehran")
-//        }
-
+    composable(route=Screen.MainScreen.name,
+        enterTransition = {
+            fadeIn(animationSpec = tween(1000))
+        }) {
         MainScreen(
             mainViewModel = mainViewModel,
             navigateToSearchScreen = navigateToSearchScreen,

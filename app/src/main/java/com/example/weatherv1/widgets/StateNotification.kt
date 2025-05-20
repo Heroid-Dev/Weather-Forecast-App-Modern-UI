@@ -12,6 +12,7 @@ fun showNotification(
     context: Context,
     title: String,
     message: String,
+    smallIcon: Int
 ) {
     val intent = Intent(context, MainActivity::class.java)
     val notificationPendingIntent = PendingIntent.getActivity(
@@ -20,7 +21,7 @@ fun showNotification(
     val notification = NotificationCompat.Builder(context, "weather_notification")
         .setContentTitle(title)
         .setContentText(message)
-        .setSmallIcon(R.drawable.outline_sunny_snowing_24)
+        .setSmallIcon(smallIcon)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         .setOngoing(true)
         .setContentIntent(notificationPendingIntent)

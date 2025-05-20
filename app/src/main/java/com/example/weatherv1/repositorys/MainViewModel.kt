@@ -4,6 +4,8 @@ package com.example.weatherv1.repositorys
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherv1.data.datastore.CityNameDataStore
+import com.example.weatherv1.data.datastore.NextDaysDataStore
+import com.example.weatherv1.data.datastore.NextDaysState
 import com.example.weatherv1.data.datastore.NotificationDataStore
 import com.example.weatherv1.data.datastore.UnitPreference
 import com.example.weatherv1.data.datastore.UnitsDataStore
@@ -25,16 +27,19 @@ class MainViewModel @Inject constructor(
     private val geographicalRepository: GeographicalRepository,
     private val cityNameDataStore: CityNameDataStore,
     private val unitsDataStore: UnitsDataStore,
-    private val notificationDataStore: NotificationDataStore
+    private val notificationDataStore: NotificationDataStore,
+    private val nextDaysDataStore: NextDaysDataStore
 ) : ViewModel() {
 
     private val _weatherStateFlow = MutableStateFlow<RequestState<Weather>>(RequestState.Idle)
     val weatherStateFlow = _weatherStateFlow.asStateFlow()
 
-    fun getWeather(city: String, forceRefresh: Boolean = false) {
+    fun getWeather(city: String, forceRefresh: Boolean = false,isLoading: Boolean=false) {
         viewModelScope.launch(Dispatchers.IO) {
-            _weatherStateFlow.value = RequestState.Loading
-            delay(2000)
+            if (isLoading){
+                _weatherStateFlow.value = RequestState.Loading
+                delay(2000)
+            }
             try {
                 weatherRepository.getWeather(city = city, fetchFromApi = forceRefresh).collect {
                     _weatherStateFlow.value = it
@@ -106,4 +111,15 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    val nextDaysState = nextDaysDataStore.nextDaysFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        NextDaysState.next7days
+    )
+
+    fun updateNextDaysState(state: NextDaysState){
+        viewModelScope.launch(Dispatchers.IO) {
+            nextDaysDataStore.updateNextDaysState(state = state)
+        }
+    }
 }

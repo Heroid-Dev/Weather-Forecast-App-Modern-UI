@@ -15,7 +15,7 @@ class WeatherRepository @Inject constructor(
     private val weatherDao: WeatherDao,
 ) {
     fun getWeather(city: String, fetchFromApi: Boolean): Flow<RequestState<Weather>> = flow {
-        emit(RequestState.Loading)
+        //emit(RequestState.Loading)
         val localData = weatherDao.getWeatherData(city = city)
         if (fetchFromApi || localData == null) {
             try {

@@ -22,10 +22,10 @@ fun TopBarNextDaysScreen(
     onBackClicked:()-> Unit
 ) {
     TopAppBarComponent(
-        modifier = Modifier.padding(horizontal = 10.dp, vertical = 20.dp),
+        modifier = Modifier.padding(horizontal = 10.dp),
         title = {
             Column(
-                modifier = Modifier.padding(start = 28.dp),
+                modifier = Modifier.padding(start = 30.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

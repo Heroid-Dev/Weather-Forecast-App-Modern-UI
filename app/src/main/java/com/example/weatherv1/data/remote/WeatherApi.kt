@@ -13,7 +13,7 @@ interface WeatherApi {
     @GET("VisualCrossingWebServices/rest/services/timeline/{city}/{days}")
     suspend fun getWeather(
         @Path("city") city: String,
-        @Path("days") days: String="next7days",
+        @Path("days") days: String="next15days",
         @Query("unitGroup") unit: String="metric",
         //@Query("include") include: String="hours%2Cfcst",
         @Query("key") key: String = Constants.API_KEY,

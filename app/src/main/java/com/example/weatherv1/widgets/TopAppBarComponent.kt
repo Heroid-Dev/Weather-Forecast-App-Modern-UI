@@ -62,40 +62,40 @@ fun TopAppBarComponent(
 }
 
 
-@Composable
-fun LocationInfo(
-    city: String,
-    localTime: Long,
-) {
-    val dateFormat = DateFormat.getDateInstance(DateFormat.ERA_FIELD)
-    val formatted = dateFormat.format(Date(localTime * 1000))
-
-    Column(
-        modifier = Modifier.padding(top = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(5.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            Image(
-                painter = painterResource(R.drawable.location),
-                contentDescription = stringResource(R.string.location_icon),
-                modifier = Modifier.size(30.dp)
-            )
-            Text(
-                text = city,
-                fontWeight = FontWeight.Bold,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                color = Color(0xFF234195),
-                fontFamily = FontFamily.SansSerif
-            )
-        }
-        Text(
-            text = formatted,
-            fontSize = MaterialTheme.typography.labelMedium.fontSize,
-            color = Color(0xFF234195).copy(alpha = .7f)
-        )
-    }
-}
+//@Composable
+//fun LocationInfo(
+//    city: String,
+//    localTime: Long,
+//) {
+//    val dateFormat = DateFormat.getDateInstance(DateFormat.ERA_FIELD)
+//    val formatted = dateFormat.format(Date(localTime * 1000))
+//
+//    Column(
+//        modifier = Modifier.padding(top = 12.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.spacedBy(5.dp)
+//    ) {
+//        Row(
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.spacedBy(5.dp)
+//        ) {
+//            Image(
+//                painter = painterResource(R.drawable.location),
+//                contentDescription = stringResource(R.string.location_icon),
+//                modifier = Modifier.size(30.dp)
+//            )
+//            Text(
+//                text = city,
+//                fontWeight = FontWeight.Bold,
+//                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+//                color = Color(0xFF234195),
+//                fontFamily = FontFamily.SansSerif
+//            )
+//        }
+//        Text(
+//            text = formatted,
+//            fontSize = MaterialTheme.typography.labelMedium.fontSize,
+//            color = Color(0xFF234195).copy(alpha = .7f)
+//        )
+//    }
+//}
