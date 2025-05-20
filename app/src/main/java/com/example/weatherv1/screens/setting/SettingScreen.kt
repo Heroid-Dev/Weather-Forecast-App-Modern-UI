@@ -2,6 +2,7 @@ package com.example.weatherv1.screens.setting
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -22,8 +25,10 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -33,19 +38,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.weatherv1.R
+import com.example.weatherv1.data.datastore.NextDaysState
 import com.example.weatherv1.repositorys.MainViewModel
 import com.example.weatherv1.utils.customShadow
+import com.example.weatherv1.utils.isInternetAvailable
 import com.example.weatherv1.widgets.InfiniteColorBackground
 import com.example.weatherv1.widgets.TopAppBarComponent
 
 @Composable
 fun SettingScreen(
     navigateToMainScreen: () -> Unit,
+    navigationToAboutScreen: () -> Unit,
     mainViewModel: MainViewModel,
 ) {
     val unitPref = mainViewModel.unitPrefs.collectAsState().value
@@ -57,13 +66,16 @@ fun SettingScreen(
 
     var notificationsEnabled = mainViewModel.notificationEnabled.collectAsState().value
 
-    val context= LocalContext.current
-    val permissionLauncher= rememberLauncherForActivityResult(
+    var nextDaysState = mainViewModel.nextDaysState.collectAsState().value
+    var expanded by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = {isGranted->
-            if (!isGranted){
+        onResult = { isGranted ->
+            if (!isGranted) {
                 mainViewModel.updateNotificationEnabled(false)
-            }else{
+            } else {
                 mainViewModel.updateNotificationEnabled(true)
             }
         }
@@ -139,7 +151,7 @@ fun SettingScreen(
                 }
 
                 SettingsCard(title = "Notifications") {
-                    ToggleRow("Notification", notificationsEnabled) {isChecked->
+                    ToggleRow("Notification", notificationsEnabled) { isChecked ->
                         if (isChecked) {
                             val hasPermission =
                                 ContextCompat.checkSelfPermission(
@@ -158,11 +170,36 @@ fun SettingScreen(
                     }
                 }
 
-                SettingsCard(title = "Forecast") {
+                SettingsCard(title = "Forecast", onCardClick = {
+                    expanded=true
+                }) {
                     ClickableRow("Days to Forecast")
+                    DropdownMenu(
+                        offset = DpOffset(250.dp, 0.dp),
+                        expanded = expanded,
+                        onDismissRequest = {
+                            expanded = false
+                        }) {
+                        NextDaysState.entries.forEach {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = when (it) {
+                                            NextDaysState.next7days -> "Next 7 days"
+                                            NextDaysState.next15days -> "Next 15 days"
+                                        }
+                                    )
+                                },
+                                onClick = {
+                                    mainViewModel.updateNextDaysState(it)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
                 }
 
-                SettingsCard(title = "More") {
+                SettingsCard(title = "More", onCardClick = {navigationToAboutScreen()}) {
                     ClickableRow("About")
                 }
             }
@@ -171,7 +208,7 @@ fun SettingScreen(
 }
 
 @Composable
-fun SettingsCard(title: String, content: @Composable () -> Unit) {
+fun SettingsCard(title: String, onCardClick:()-> Unit={}, content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -183,7 +220,9 @@ fun SettingsCard(title: String, content: @Composable () -> Unit) {
                 offsetY = 5.dp
             )
             .background(Color(0x9ADEF2FF), shape = RoundedCornerShape(30.dp))
+            .clickable{onCardClick()}
             .padding(vertical = 20.dp, horizontal = 16.dp)
+
     ) {
         Text(
             text = title,
@@ -234,8 +273,7 @@ fun ToggleRow(
 fun ClickableRow(label: String) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable { /* handle click */ },
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -248,5 +286,8 @@ fun ClickableRow(label: String) {
 @Preview(showBackground = true)
 @Composable
 private fun SettingScreenPreview() {
-    SettingScreen(mainViewModel = hiltViewModel(), navigateToMainScreen = {})
+    SettingScreen(
+        mainViewModel = hiltViewModel(),
+        navigateToMainScreen = {},
+        navigationToAboutScreen = {})
 }

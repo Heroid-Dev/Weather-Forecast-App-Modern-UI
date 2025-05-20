@@ -1,164 +1,125 @@
 package com.example.weatherv1.screens.nextday
 
-import androidx.annotation.DrawableRes
+import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.weatherv1.R
-import com.example.weatherv1.utils.customShadow
+import com.example.weatherv1.model.Day
+import com.example.weatherv1.repositorys.MainViewModel
+import com.example.weatherv1.utils.celsiusToFahrenheit
+import com.example.weatherv1.utils.getDayOfWeekFromEpoch
+import com.example.weatherv1.utils.getWeatherIconFromCondition
 import com.example.weatherv1.widgets.InfiniteColorBackground
 
 
-data class InfoDay(
-    val day: String,
-    @DrawableRes val icon: Int,
-    val conditions: String,
-    val maxTemp: Int,
-    val minTemp: Int
-)
-
-
 @Composable
-fun RowsOfDaysOfTheWeek() {
-    val forecastList = listOf(
-        InfoDay(
-            day = "Saturday",
-            icon = R.drawable.img_sun,
-            conditions = "Sunny",
-            maxTemp = 30,
-            minTemp = 18
-        ),
-        InfoDay(
-            day = "Sunday",
-            icon = R.drawable.img_sub_rain,
-            conditions = "Partly Cloudy",
-            maxTemp = 27,
-            minTemp = 17
-        ),
-        InfoDay(
-            day = "Monday",
-            icon = R.drawable.img_rain,
-            conditions = "Rainy",
-            maxTemp = 22,
-            minTemp = 15
-        ),
-        InfoDay(
-            day = "Tuesday",
-            icon = R.drawable.img_cloud,
-            conditions = "Thunderstorm",
-            maxTemp = 24,
-            minTemp = 16
-        ),
-        InfoDay(
-            day = "Wednesday",
-            icon = R.drawable.img_snow,
-            conditions = "Snowy",
-            maxTemp = -2,
-            minTemp = -10
-        )
-    )
+fun RowsOfDaysOfTheWeek(days: List<Day>, mainViewModel: MainViewModel) {
+    val unitPref = mainViewModel.unitPrefs.collectAsState().value
     LazyColumn {
         items(
-            items = forecastList,
+            items = days.dropLast(1),
             key = {
-                it.day
+                it.datetime
             }
         ) { infoDay ->
-            RowsOfDaysOfTheWeekItem(infoDay)
-        }
-    }
-}
-
-@Composable
-fun RowsOfDaysOfTheWeekItem(
-    infoDay: InfoDay
-) {
-    InfiniteColorBackground(
-        color1 = Color(0xFF38B0FF),
-        color2 = Color(0xFF96C0EA)
-    ) { color1,_->
-        Box(
-            modifier = Modifier
-                .padding(vertical = 10.dp)
-                .fillMaxWidth()
-                .height(80.dp)
-                .customShadow(
-                    color = color1,
-                    alpha = .6f,
-                    borderRadius = 12.dp,
-                    shadowRadius = 8.dp,
-                    offsetY = 2.dp
-                )
-                .background(
-                    brush = Brush.linearGradient(
-                        listOf(
-                            Color(0xFFFFFFFF),
-                            Color(0xFFFFFFFF),
-                            Color(0xFFD6EFFF),
-                        )
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ),
-        ) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 25.dp),
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .padding(horizontal = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    modifier = Modifier.weight(1.5f),
-                    text = infoDay.day,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black
-                )
-
-                Image(
-                    painter = painterResource(infoDay.icon),
-                    contentDescription = infoDay.conditions,
-                    modifier = Modifier
-                        .height(40.dp)
-                        .padding(end = 10.dp)
-                        .weight(1f),
-                    contentScale = ContentScale.FillHeight
-                )
-
-
-                Text(
-                    text = infoDay.conditions,
                     modifier = Modifier.weight(2f),
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray
+                    text = getDayOfWeekFromEpoch(infoDay.datetimeEpoch.toLong()),
+                    fontWeight = FontWeight.W500,
+                    color = Color(0xFF204B6E),
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize
                 )
+                Row(modifier = Modifier.weight(1.2f)) {
+                    Image(
+                        painter = painterResource(R.drawable.precip),
+                        contentDescription = "Rain icon",
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(
+                        text = if (unitPref.inRain_mm) "${infoDay.precip.toInt()}mm" else "${infoDay.precipprob.toInt()}%",
+                        color = Color(0xFF679EE6),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.weight(3f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                        Image(
+                            painter = painterResource(getWeatherIconFromCondition(infoDay.hours[12].icon)),
+                            contentDescription = infoDay.conditions,
+                            modifier = Modifier.height(22.dp),
+                            contentScale = ContentScale.FillHeight
+                        )
+                        Image(
+                            painter = painterResource(getWeatherIconFromCondition(infoDay.hours[20].icon)),
+                            contentDescription = infoDay.conditions,
+                            modifier = Modifier.height(22.dp),
+                            contentScale = ContentScale.FillHeight
+                        )
+
+                    Text(
+                        text = infoDay.conditions,
+                        fontWeight = FontWeight.W400,
+                        color = Color(0xFF204B6E),
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize
+                    )
+                }
 
                 Text(
-                    text = "${infoDay.maxTemp}°/${infoDay.minTemp}°",
-                    fontWeight = FontWeight.Black,
-                    color = Color.Gray
+                    modifier = Modifier.weight(1.2f),
+                    text = "${
+                        if (unitPref.isFahrenheit)
+                            celsiusToFahrenheit(infoDay.tempmax).toInt()
+                                .toString() + "F" else "${infoDay.tempmax.toInt()}°"
+                    }/${
+                        if (unitPref.isFahrenheit) celsiusToFahrenheit(infoDay.tempmin).toInt()
+                            .toString() + "F" else "${infoDay.tempmin.toInt()}°"
+                    }",
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                    color = Color(0xFF204B6E),
+                    fontWeight = FontWeight.W500
                 )
-
             }
         }
     }
-
 }
+

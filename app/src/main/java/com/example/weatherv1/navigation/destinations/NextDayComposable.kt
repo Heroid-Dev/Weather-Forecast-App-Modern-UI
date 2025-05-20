@@ -4,13 +4,16 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.example.weatherv1.navigation.Screen
 import com.example.weatherv1.repositorys.MainViewModel
-import com.example.weatherv1.screens.nextday.NextDaysScreen
+import com.example.weatherv1.screens.nextday.NextDaysScreen2
 
 fun NavGraphBuilder.nextDayComposable(
     mainViewModel: MainViewModel,
-    navigateToMainScreen:()-> Unit
-){
+    navigateToMainScreen: () -> Unit,
+) {
     composable(Screen.NextDayScreen.name) {
-        NextDaysScreen(navigateToMainScreen)
+        NextDaysScreen2(
+            navigateToMainScreen = navigateToMainScreen,
+            mainViewModel = mainViewModel
+        )
     }
 }

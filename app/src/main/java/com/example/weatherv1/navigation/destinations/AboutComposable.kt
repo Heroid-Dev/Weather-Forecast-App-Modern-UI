@@ -5,8 +5,8 @@ import androidx.navigation.compose.composable
 import com.example.weatherv1.navigation.Screen
 import com.example.weatherv1.screens.about.AboutScreen
 
-fun NavGraphBuilder.aboutComposable() {
+fun NavGraphBuilder.aboutComposable(navigateToMainScreen: () -> Unit) {
     composable(Screen.AboutScreen.name) {
-        AboutScreen()
+        AboutScreen(navigateToMainScreen=navigateToMainScreen)
     }
 }

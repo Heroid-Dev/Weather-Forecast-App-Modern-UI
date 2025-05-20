@@ -127,7 +127,7 @@ fun MainScreenContent(
 
     weatherState.DisplayResult(
         onLoading = {
-            LoadingScreen()
+                LoadingScreen()
         },
         onSuccess = {
             val weatherInfo = weatherState.getDataOrNull()!!

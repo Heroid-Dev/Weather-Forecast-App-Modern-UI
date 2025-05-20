@@ -82,7 +82,7 @@ fun DailyForecast(
 
         ForecastValue(
             temp = if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
-                "%.2f".format(celsiusToFahrenheit(nowWeather.temp)) + "F"
+                "%.1f".format(celsiusToFahrenheit(nowWeather.temp)) + "F"
             else
                 "${nowWeather.temp.toInt()}°",
             modifier = Modifier.constrainAs(forecastValue) {

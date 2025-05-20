@@ -2,6 +2,7 @@ package com.example.weatherv1.di
 
 import android.content.Context
 import com.example.weatherv1.data.datastore.CityNameDataStore
+import com.example.weatherv1.data.datastore.NextDaysDataStore
 import com.example.weatherv1.data.datastore.NotificationDataStore
 import com.example.weatherv1.data.datastore.UnitsDataStore
 import dagger.Module
@@ -30,4 +31,8 @@ object DataStoreModule {
     fun provideNotificationDataStore(@ApplicationContext context: Context): NotificationDataStore =
         NotificationDataStore(context)
 
+    @Provides
+    @Singleton
+    fun provideNextDaysDataStore(@ApplicationContext context: Context): NextDaysDataStore =
+        NextDaysDataStore(context)
 }

@@ -8,11 +8,13 @@ import com.example.weatherv1.screens.setting.SettingScreen
 
 fun NavGraphBuilder.settingComposable(
     navigateToMainScreen: () -> Unit,
+    navigationToAboutScreen:()-> Unit,
     mainViewModel: MainViewModel,
 ) {
     composable(Screen.SettingScreen.name) {
         SettingScreen(
             navigateToMainScreen = navigateToMainScreen,
+            navigationToAboutScreen = navigationToAboutScreen,
             mainViewModel = mainViewModel
         )
     }

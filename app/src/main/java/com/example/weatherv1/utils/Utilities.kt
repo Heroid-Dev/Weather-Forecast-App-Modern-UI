@@ -5,6 +5,10 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.annotation.DrawableRes
 import com.example.weatherv1.R
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.TextStyle
+import java.util.Locale
 
 @DrawableRes
 fun getWeatherIconFromCondition(condition: String): Int =
@@ -16,6 +20,18 @@ fun getWeatherIconFromCondition(condition: String): Int =
         "clear-night" -> R.drawable.img_moon
         "partly-cloudy-day" -> R.drawable.img_cloudy
         "partly-cloudy-night" -> R.drawable.img_moon_stars
+        else -> R.drawable.img_sun
+    }
+
+fun getWeatherNotificationIcon(condition: String): Int =
+    when (condition) {
+        "rain" -> R.drawable.rain_notif_icon
+        "snow" -> R.drawable.snow_notif_icon
+        "cloudy" -> R.drawable.cloudy_notif_icon
+        "clear-day" -> R.drawable.sun_notif_icon
+        "clear-night" -> R.drawable.moon_notif_icon
+        "partly-cloudy-day" -> R.drawable.partly_cloud_notif_icon
+        "partly-cloudy-night" -> R.drawable.partly_cloud_moon_notif_icon
         else -> R.drawable.img_sun
     }
 
@@ -48,4 +64,9 @@ fun categorizeUVIndex(uvIndex: Double): String {
     }
 }
 
+fun getDayOfWeekFromEpoch(epochSeconds: Long): String {
+    val instant = Instant.ofEpochSecond(epochSeconds)
+    val zonedDateTime = instant.atZone(ZoneId.systemDefault())
+    return zonedDateTime.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+}
 

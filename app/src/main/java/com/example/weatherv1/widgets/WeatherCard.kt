@@ -22,24 +22,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.weatherv1.R
-import com.example.weatherv1.utils.customShadow
 
 @Composable
 fun WeatherCard(
     modifier: Modifier= Modifier,
     onCardClicked:()-> Unit,
-    @DrawableRes weatherImage: Int=R.drawable.img_rain,
-    time: String="Tomorrow",
-    maxTemp:Int=23,
-    minTemp: Int=17,
-    status: String="Rainy",
-    humidity: Int=30,
-    Precipitation: Int=30,
-    Wind: Int=30
+    @DrawableRes weatherImage: Int= R.drawable.img_sun,
+    time: String="",
+    maxTemp: String="",
+    minTemp: String="",
+    status: String="",
+    humidity: Int=1,
+    Precipitation: String="",
+    Wind: String=""
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -53,14 +51,7 @@ fun WeatherCard(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .customShadow(
-                    color = Color(0xFFA8D8FA),
-                    alpha = .6f,
-                    borderRadius = 50.dp,
-                    shadowRadius = 20.dp,
-                    offsetY = 20.dp
-                )
-                .background(color = Color.White, shape = RoundedCornerShape(24.dp))
+                .background(color = Color(0xC6FFFFFF), shape = RoundedCornerShape(30.dp))
                 .constrainAs(background) {
                     linkTo(
                         start = parent.start,
@@ -95,17 +86,20 @@ fun WeatherCard(
             Text(
                 text = time,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF204B6E)
             )
             Text(
-                text = "${maxTemp}°/${minTemp}°",
+                text = "${maxTemp}/${minTemp}",
                 style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Black
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF204B6E)
             )
             Text(
                 text = status,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Light
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.W300,
+                color = Color(0xFF204B6E)
             )
         }
         Row(
@@ -127,17 +121,23 @@ fun WeatherCard(
                     contentDescription = "humidity icon"
                 )
                 Text(text = "$humidity%")
-                Text(text = "Humidity")
+                Text(text = "Humidity",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF204B6E))
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
                     painter = painterResource(R.drawable.precip),
-                    contentDescription = "Precipitation icon"
+                    contentDescription = "Rain icon"
                 )
-                Text(text = "$Precipitation%")
-                Text(text = "Precipitation")
+                Text(text = Precipitation)
+                Text(text = "Rain",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF204B6E))
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -146,19 +146,14 @@ fun WeatherCard(
                     painter = painterResource(R.drawable.wind),
                     contentDescription = null
                 )
-                Text(text = "${Wind}Km/h")
-                Text(text = "Wind speed")
+                Text(text = Wind)
+                Text(text = "Wind speed",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF204B6E))
             }
         }
     }
 
 }
 
-
-@Preview
-@Composable
-private fun WeatherCardPreview() {
-    WeatherCard(
-        onCardClicked = {}
-    )
-}

@@ -35,7 +35,7 @@ fun AirQualityDataList(
             AirQuality(
                 title = "Temperature",
                 value = if (unitPref.isFahrenheit)
-                    "%.2f".format(celsiusToFahrenheit(temp)) + "F"
+                    "%.1f".format(celsiusToFahrenheit(temp)) + "F"
                 else
                     "$temp°",
                 icon = R.drawable.temp
