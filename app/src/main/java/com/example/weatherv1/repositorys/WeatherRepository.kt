@@ -14,26 +14,32 @@ class WeatherRepository @Inject constructor(
     private val weatherApi: WeatherApi,
     private val weatherDao: WeatherDao,
 ) {
-    fun getWeather(city: String, fetchFromApi: Boolean): Flow<RequestState<Weather>> = flow {
+    fun getWeather(city: String, fetchFromApi: Boolean,fetchOnlyFromApi: Boolean): Flow<RequestState<Weather>> = flow {
         //emit(RequestState.Loading)
         val localData = weatherDao.getWeatherData(city = city)
-        if (fetchFromApi || localData == null) {
-            try {
-                val remoteWeather = weatherApi.getWeather(city = city)
-                weatherDao.insertWeather(
-                    WeatherEntity(
-                        city = city,
-                        data = Gson().toJson(remoteWeather)
+        if (fetchOnlyFromApi){
+            val remoteWeather = weatherApi.getWeather(city = city)
+            emit(RequestState.Success(remoteWeather))
+        }else {
+            if (fetchFromApi || localData == null) {
+                try {
+                    val remoteWeather = weatherApi.getWeather(city = city)
+                    weatherDao.deleteAllWeatherData()
+                    weatherDao.insertWeather(
+                        WeatherEntity(
+                            city = city,
+                            data = Gson().toJson(remoteWeather)
+                        )
                     )
-                )
-                emit(RequestState.Success(remoteWeather))
-            } catch (e: Exception) {
-                emit(RequestState.Error(e))
+                    emit(RequestState.Success(remoteWeather))
+                } catch (e: Exception) {
+                    emit(RequestState.Error(e))
+                }
             }
-        }
-        if (!fetchFromApi && localData != null) {
-            val weather = Gson().fromJson(localData.data, Weather::class.java)
-            emit(RequestState.Success(weather))
+            if (!fetchFromApi && localData != null) {
+                val weather = Gson().fromJson(localData.data, Weather::class.java)
+                emit(RequestState.Success(weather))
+            }
         }
     }
 

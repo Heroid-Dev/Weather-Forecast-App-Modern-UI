@@ -85,13 +85,13 @@ fun RowsOfDaysOfTheWeek(days: List<Day>, mainViewModel: MainViewModel) {
                         Image(
                             painter = painterResource(getWeatherIconFromCondition(infoDay.hours[12].icon)),
                             contentDescription = infoDay.conditions,
-                            modifier = Modifier.height(22.dp),
+                            modifier = Modifier.height(17.dp),
                             contentScale = ContentScale.FillHeight
                         )
                         Image(
                             painter = painterResource(getWeatherIconFromCondition(infoDay.hours[20].icon)),
                             contentDescription = infoDay.conditions,
-                            modifier = Modifier.height(22.dp),
+                            modifier = Modifier.height(17.dp),
                             contentScale = ContentScale.FillHeight
                         )
 
@@ -115,7 +115,7 @@ fun RowsOfDaysOfTheWeek(days: List<Day>, mainViewModel: MainViewModel) {
                     }",
                     fontSize = MaterialTheme.typography.labelSmall.fontSize,
                     color = Color(0xFF204B6E),
-                    fontWeight = FontWeight.W500
+                    fontWeight = FontWeight.W600
                 )
             }
         }

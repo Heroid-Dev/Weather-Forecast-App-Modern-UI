@@ -12,4 +12,7 @@ interface WeatherDao {
 
     @Query("SELECT * FROM weather_table WHERE city= :city")
     suspend fun getWeatherData(city: String): WeatherEntity?
+
+    @Query("DELETE FROM weather_table")
+    suspend fun deleteAllWeatherData()
 }

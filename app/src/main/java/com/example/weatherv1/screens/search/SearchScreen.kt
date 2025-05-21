@@ -173,7 +173,7 @@ fun SearchScreen(
                             return@SearchTextField
                         }
                         isLoading = true
-                        mainViewModel.getWeather(city = searchText, forceRefresh = true)
+                        mainViewModel.getWeather(city = searchText, forceRefresh = true, fetchOnlyFromApi = true)
                         scope.launch {
                             delay(2000)
                             mainViewModel.weatherStateFlow.collectLatest { state ->

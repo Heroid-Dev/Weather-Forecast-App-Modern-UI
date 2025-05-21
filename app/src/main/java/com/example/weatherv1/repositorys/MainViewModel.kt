@@ -34,14 +34,14 @@ class MainViewModel @Inject constructor(
     private val _weatherStateFlow = MutableStateFlow<RequestState<Weather>>(RequestState.Idle)
     val weatherStateFlow = _weatherStateFlow.asStateFlow()
 
-    fun getWeather(city: String, forceRefresh: Boolean = false,isLoading: Boolean=false) {
+    fun getWeather(city: String, forceRefresh: Boolean = false,isLoading: Boolean=false,fetchOnlyFromApi: Boolean=false) {
         viewModelScope.launch(Dispatchers.IO) {
             if (isLoading){
                 _weatherStateFlow.value = RequestState.Loading
                 delay(2000)
             }
             try {
-                weatherRepository.getWeather(city = city, fetchFromApi = forceRefresh).collect {
+                weatherRepository.getWeather(city = city, fetchFromApi = forceRefresh, fetchOnlyFromApi = fetchOnlyFromApi).collect {
                     _weatherStateFlow.value = it
                 }
             } catch (e: Exception) {
