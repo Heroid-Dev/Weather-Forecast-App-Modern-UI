@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.example.weatherv1.MainActivity
-import com.example.weatherv1.R
 
 fun showNotification(
     context: Context,
@@ -22,7 +21,7 @@ fun showNotification(
         .setContentTitle(title)
         .setContentText(message)
         .setSmallIcon(smallIcon)
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setOngoing(true)
         .setContentIntent(notificationPendingIntent)
         .build()

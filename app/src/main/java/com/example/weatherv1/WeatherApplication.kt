@@ -13,7 +13,7 @@ class WeatherApplication: Application(){
         val channel = NotificationChannel(
             "weather_notification",
             "Weather Notification",
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH
         )
         val notificationManager= getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)

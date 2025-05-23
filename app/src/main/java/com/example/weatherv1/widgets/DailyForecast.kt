@@ -1,18 +1,17 @@
-package com.example.weatherv1.screens.main
+package com.example.weatherv1.widgets
 
-import android.icu.text.DateFormat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -23,36 +22,39 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.example.weatherv1.model.Hour
-import com.example.weatherv1.repositorys.MainViewModel
+import com.example.weatherv1.R
 import com.example.weatherv1.ui.theme.ColorSurface
-import com.example.weatherv1.utils.celsiusToFahrenheit
 import com.example.weatherv1.utils.customShadow
 import com.example.weatherv1.utils.getWeatherIconFromCondition
-import java.util.Date
 
 
 @Composable
 fun DailyForecast(
     modifier: Modifier = Modifier,
-    nowWeather: Hour,
-    mainViewModel: MainViewModel,
+    icon: String,
+    iconSize: Dp,
+    temp: String,
+    title: String,
+    subtitle: String,
+    onClickCard:()-> Unit={},
+    removeButton: Boolean=false,
+    onClickRemoveButton:()-> Unit={}
 ) {
 
     ConstraintLayout(
         modifier = modifier
-            .fillMaxWidth(.67f)
-            .fillMaxHeight(.46f)//45f
     ) {
         val (
             forecastImage,
             forecastValue,
             description,
             background,
+            button
         ) = createRefs()
 
         CardBackground(
@@ -65,14 +67,14 @@ fun DailyForecast(
                     topMargin = 25.dp,
                 )
                 height = Dimension.fillToConstraints
-            }
+            }, onClickCard = onClickCard
         )
         Image(
-            painter = painterResource(id = getWeatherIconFromCondition(condition = nowWeather.icon)),
+            painter = painterResource(id = getWeatherIconFromCondition(condition = icon)),
             contentDescription = "forecast card icon",
             contentScale = ContentScale.FillHeight,
             modifier = Modifier
-                .height(174.dp)
+                .height(iconSize)
                 .constrainAs(forecastImage) {
                     start.linkTo(anchor = parent.start)
                     top.linkTo(anchor = parent.top)
@@ -81,10 +83,7 @@ fun DailyForecast(
         )
 
         ForecastValue(
-            temp = if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
-                "%.1f".format(celsiusToFahrenheit(nowWeather.temp)) + "F"
-            else
-                "${nowWeather.temp.toInt()}°",
+            temp = temp,
             modifier = Modifier.constrainAs(forecastValue) {
                 top.linkTo(anchor = forecastImage.bottom)
                 bottom.linkTo(anchor = description.top)
@@ -93,14 +92,27 @@ fun DailyForecast(
             })
 
         ForecastDescription(
-            conditions = nowWeather.conditions,
-            datetimeEpoch = nowWeather.datetimeEpoch.toLong(),
+            conditions = title,
+            datetimeEpoch = subtitle,
             modifier = Modifier.constrainAs(description) {
                 start.linkTo(anchor = parent.start)
                 end.linkTo(anchor = parent.end)
                 top.linkTo(anchor = forecastValue.bottom)
                 bottom.linkTo(anchor = parent.bottom, margin = 20.dp)
             })
+
+        if (removeButton) {
+            TopAppBarButton(
+                modifier = Modifier.constrainAs(button) {
+                    start.linkTo(anchor = parent.start)
+                    top.linkTo(anchor = parent.top, margin = 25.dp)
+                }.size(50.dp),
+                icon = R.drawable.remove_icon,
+                iconSize = 20.dp,
+                iconDescription = "remove button",
+                onClickButton = onClickRemoveButton
+            )
+        }
     }
 }
 
@@ -128,10 +140,9 @@ fun ForecastValue(modifier: Modifier, temp: String) {
 fun ForecastDescription(
     modifier: Modifier = Modifier,
     conditions: String,
-    datetimeEpoch: Long,
+    datetimeEpoch: String,
 ) {
-    val dateFormat = DateFormat.getDateInstance(DateFormat.ERA_FIELD)
-    val formatted = dateFormat.format(Date(datetimeEpoch * 1000))
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -143,7 +154,7 @@ fun ForecastDescription(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = formatted,
+            text = datetimeEpoch,
             color = ColorSurface,
             style = MaterialTheme.typography.bodyMedium
         )
@@ -151,7 +162,7 @@ fun ForecastDescription(
 }
 
 @Composable
-fun CardBackground(modifier: Modifier = Modifier) {
+fun CardBackground(modifier: Modifier = Modifier,onClickCard:()-> Unit) {
     Box(
         modifier = modifier
             .customShadow(
@@ -164,6 +175,7 @@ fun CardBackground(modifier: Modifier = Modifier) {
             )
             .clip(RoundedCornerShape(32.dp))
             .fillMaxWidth()
+            .clickable{onClickCard()}
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(

@@ -122,6 +122,7 @@ fun MainScreenContent(
             }
         }else{
             mainViewModel.getWeather(cityName.replace("(?i)\\s*county$".toRegex(), "").lowercase())
+            mainViewModel.refreshFavorites()
         }
     }
 

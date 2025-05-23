@@ -9,8 +9,10 @@ import com.example.weatherv1.data.datastore.NextDaysState
 import com.example.weatherv1.data.datastore.NotificationDataStore
 import com.example.weatherv1.data.datastore.UnitPreference
 import com.example.weatherv1.data.datastore.UnitsDataStore
+import com.example.weatherv1.data.local.FavoriteEntity
 import com.example.weatherv1.model.Weather
 import com.example.weatherv1.widgets.RequestState
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -23,12 +25,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val weatherRepository: WeatherRepository,
+    private val weatherRepository: WeatherRepository2,
     private val geographicalRepository: GeographicalRepository,
     private val cityNameDataStore: CityNameDataStore,
     private val unitsDataStore: UnitsDataStore,
     private val notificationDataStore: NotificationDataStore,
-    private val nextDaysDataStore: NextDaysDataStore
+    private val nextDaysDataStore: NextDaysDataStore,
+    private val favoriteRepository: FavoriteRepository
 ) : ViewModel() {
 
     private val _weatherStateFlow = MutableStateFlow<RequestState<Weather>>(RequestState.Idle)
@@ -122,4 +125,50 @@ class MainViewModel @Inject constructor(
             nextDaysDataStore.updateNextDaysState(state = state)
         }
     }
+
+
+    private val _allFavorites= MutableStateFlow<List<Weather>>(emptyList())
+    val allFavorites=_allFavorites.asStateFlow()
+
+    fun getAllFavorites(){
+        viewModelScope.launch(Dispatchers.IO) {
+            favoriteRepository.getAllFavorites().collect {
+                _allFavorites.value=it
+            }
+        }
+    }
+
+    fun refreshFavorites(){
+        viewModelScope.launch(Dispatchers.IO) {
+            favoriteRepository.refreshAllFavorites()
+        }
+    }
+
+    fun addToFavorite(weather: Weather){
+        viewModelScope.launch(Dispatchers.IO) {
+            favoriteRepository.addToFavorites(
+                FavoriteEntity(
+                    city = weather.address,
+                    weather = Gson().toJson(weather)
+                )
+            )
+        }
+    }
+
+    private val _isFavorite = MutableStateFlow(false)
+    val isFavorite = _isFavorite.asStateFlow()
+    fun existToFavorite(city: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            _isFavorite.value = favoriteRepository.getFavorite(city = city) !=null
+        }
+    }
+
+    fun deleteFromFavorites(city: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            favoriteRepository.getFavorite(city = city)?.let {
+                favoriteRepository.deleteFromFavorite(it)
+            }
+        }
+    }
+
 }

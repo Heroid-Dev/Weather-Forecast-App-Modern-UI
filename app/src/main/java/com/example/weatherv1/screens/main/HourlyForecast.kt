@@ -40,25 +40,28 @@ import com.example.weatherv1.utils.getWeatherIconFromCondition
 
 
 @Composable
-fun HourlyForecast(listOfHour: List<Hour>,
-                   mainViewModel: MainViewModel) {
+fun HourlyForecast(
+    modifier: Modifier= Modifier,
+    listOfHour: List<Hour>,
+    mainViewModel: MainViewModel,
+) {
 
     LazyRow(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         contentPadding = PaddingValues(horizontal = 10.dp)
     ) {
         items(
             items = listOfHour,
 
-        ) {hourlyWeather->
-            HourlyForecastItem(hourlyWeather=hourlyWeather,mainViewModel=mainViewModel)
+            ) { hourlyWeather ->
+            HourlyForecastItem(hourlyWeather = hourlyWeather, mainViewModel = mainViewModel)
         }
     }
 }
 
 @Composable
-fun HourlyForecastItem(hourlyWeather: Hour,mainViewModel: MainViewModel) {
+fun HourlyForecastItem(hourlyWeather: Hour, mainViewModel: MainViewModel) {
     val unitPref = mainViewModel.unitPrefs.collectAsState().value
     Box(
         modifier = Modifier
@@ -83,19 +86,31 @@ fun HourlyForecastItem(hourlyWeather: Hour,mainViewModel: MainViewModel) {
                 shape = RoundedCornerShape(15.dp)
             ),
     ) {
-        Column(modifier = Modifier
-            .padding(vertical = 5.dp, horizontal = 3.dp)
-            .fillMaxSize(),
+        Column(
+            modifier = Modifier
+                .padding(vertical = 5.dp, horizontal = 3.dp)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceAround) {
+            verticalArrangement = Arrangement.SpaceAround
+        ) {
 
-            Text(text=hourlyWeather.datetime.removeSuffix(":00"), color = Color.White, fontWeight = FontWeight.Medium)
-            Image(painter = painterResource(getWeatherIconFromCondition(hourlyWeather.icon)), contentDescription = null,
-                modifier = Modifier.size(38.dp))
+            Text(
+                text = hourlyWeather.datetime.removeSuffix(":00"),
+                color = Color.White,
+                fontWeight = FontWeight.Medium,
+                fontSize = MaterialTheme.typography.labelMedium.fontSize
+            )
+            Image(
+                painter = painterResource(getWeatherIconFromCondition(hourlyWeather.icon)),
+                contentDescription = null,
+                modifier = Modifier.size(38.dp)
+            )
 
-            Row(modifier = Modifier.fillMaxWidth(),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround) {
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
 
                 Row {
                     Icon(

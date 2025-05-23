@@ -22,7 +22,7 @@ fun TopBarSearchScreen(
     onClickBackButton: () -> Unit,
 ) {
     TopAppBarComponent(
-        modifier = Modifier.padding(horizontal = 10.dp, vertical = 20.dp),
+        modifier = Modifier.padding(horizontal = 10.dp, vertical = 30.dp),
         title = {
             TextTopBarSearchScreen()
         },

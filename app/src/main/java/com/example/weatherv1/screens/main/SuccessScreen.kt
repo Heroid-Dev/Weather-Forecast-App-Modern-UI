@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -59,8 +60,10 @@ import com.example.weatherv1.repositorys.MainViewModel
 import com.example.weatherv1.utils.celsiusToFahrenheit
 import com.example.weatherv1.utils.getWeatherNotificationIcon
 import com.example.weatherv1.utils.isInternetAvailable
+import com.example.weatherv1.widgets.DailyForecast
 import com.example.weatherv1.widgets.InfiniteColorBackground
 import com.example.weatherv1.widgets.RequestState
+import com.example.weatherv1.widgets.TopAppBarButton
 import com.example.weatherv1.widgets.TopAppBarComponent
 import com.example.weatherv1.widgets.cancelNotification
 import com.example.weatherv1.widgets.showNotification
@@ -82,7 +85,7 @@ fun SuccessScreen(
     navigateToSettingScreen: () -> Unit,
     weatherInfo: Weather,
     cityName: String,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var indexSelectedItem by remember { mutableIntStateOf(0) }
@@ -140,7 +143,7 @@ fun SuccessScreen(
 
         SuccessScreenContent(
             cityName = cityName,
-            weatherInfo=weatherInfo,
+            weatherInfo = weatherInfo,
             onSearchClicked = navigationToSearchScreen,
             onNextDayClicked = navigateToNextDayScreen,
             onMenuClicked = {
@@ -162,39 +165,74 @@ private fun SuccessScreenContent(
     onSearchClicked: () -> Unit,
     onMenuClicked: () -> Unit,
     onNextDayClicked: () -> Unit,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
 ) {
 
     val refreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val context= LocalContext.current
+    val context = LocalContext.current
 
-    val currentTime= LocalTime.now().hour
-    val today= LocalDate.now()
-    val formattedDate=today.format(DateTimeFormatter.ISO_DATE)
+    val currentTime = LocalTime.now().hour
+    val today = LocalDate.now()
+    val formattedDate = today.format(DateTimeFormatter.ISO_DATE)
 
-    val nowDayWeather= weatherInfo.days.first {
+    val nowDayWeather = weatherInfo.days.first {
         it.datetime == formattedDate
     }
-    val nowHourlyWeather =nowDayWeather.hours.first {
+    val nowHourlyWeather = nowDayWeather.hours.first {
         it.datetime.substringBefore(":").toInt() == currentTime
     }
-    val tempMin=if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
+
+
+    val tempMinDay = if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
         "${celsiusToFahrenheit(nowDayWeather.tempmin).toInt()}F"
     else
         "${nowDayWeather.tempmin.toInt()}°"
-    val tempMax=if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
-        "${celsiusToFahrenheit(nowDayWeather.tempmax)}F"
+    val tempMaxDay = if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
+        "${celsiusToFahrenheit(nowDayWeather.tempmax).toInt()}F"
     else
         "${nowDayWeather.tempmax.toInt()}°"
-    val descriptionNews="${nowDayWeather.description}Highs $tempMax and lows $tempMin."
-    val notificationEnabled=mainViewModel.notificationEnabled.collectAsState().value
-    if (notificationEnabled){
-        showNotification(context,"${nowHourlyWeather.conditions} in $cityName",descriptionNews,getWeatherNotificationIcon(nowHourlyWeather.icon))
-    }else{
+    val tempHourly = if (mainViewModel.unitPrefs.collectAsState().value.isFahrenheit)
+        "%.1f".format(celsiusToFahrenheit(nowHourlyWeather.temp)) + "F"
+    else
+        "${nowHourlyWeather.temp.toInt()}°"
+
+    val descriptionNews = "${nowDayWeather.description}Highs $tempMaxDay and lows $tempMinDay."
+
+
+    val notificationEnabled = mainViewModel.notificationEnabled.collectAsState().value
+    if (notificationEnabled) {
+        showNotification(
+            context,
+            "${nowHourlyWeather.conditions} in $cityName",
+            descriptionNews,
+            getWeatherNotificationIcon(nowHourlyWeather.icon)
+        )
+    } else {
         cancelNotification(context)
     }
+
+    fun refreshWeather() {
+        if (!isInternetAvailable(context)) {
+            Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
+        } else {
+            isRefreshing = true
+            mainViewModel.getWeather(
+                city = weatherInfo.address,
+                forceRefresh = true,
+                isLoading = true
+            )
+            mainViewModel.weatherStateFlow
+                .onEach {
+                    if (it !is RequestState.Loading) {
+                        isRefreshing = false
+                    }
+                }
+                .launchIn(scope)
+        }
+    }
+
     InfiniteColorBackground(
         color1 = Color(0xFFEDFAFF),
         color2 = Color(0xFF9FD6FF),
@@ -206,90 +244,129 @@ private fun SuccessScreenContent(
                 isRefreshing = isRefreshing,
                 state = refreshState,
                 onRefresh = {
-                    if (!isInternetAvailable(context)) {
-                        Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
-
-                    }else {
-                        isRefreshing = true
-                        mainViewModel.getWeather(city = weatherInfo.address, forceRefresh = true,isLoading=true)
-                        mainViewModel.weatherStateFlow
-                            .onEach {
-                                if (it !is RequestState.Loading) {
-                                    isRefreshing = false
-                                }
-                            }
-                            .launchIn(scope)
-                    }
+                    refreshWeather()
                 }
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(color1, color2),
-                                start = Offset(0f, 0f),
-                                end = Offset.Infinite
-                            )
-                        )
-                        .padding(innerPadding)
-
+                        .background(color = Color.Transparent)
+                        .verticalScroll(rememberScrollState())
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(horizontal = 10.dp, vertical = 10.dp)
-                            .verticalScroll(state = rememberScrollState()),
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(color1, color2),
+                                    start = Offset(0f, 0f),
+                                    end = Offset.Infinite
+                                )
+                            )
+                            .padding(innerPadding),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         TopAppBarComponent(
+                            modifier = Modifier.padding(horizontal = 10.dp),
                             title = {
-                                LocationInfoText(city = cityName, localTime = nowHourlyWeather.datetimeEpoch.toLong())
+                                LocationInfoText(
+                                    city = cityName.replaceFirstChar { it.uppercase() },
+                                    localTime = nowHourlyWeather.datetimeEpoch.toLong()
+                                )
                             },
                             navigationIcon = R.drawable.menuicon,
                             actionIcon = R.drawable.searchicon,
                             onNavigationClicked = onMenuClicked,
                             onActionClicked = onSearchClicked,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         )
-                        DailyForecast(
-                            mainViewModel= mainViewModel,
-                            nowWeather = nowHourlyWeather
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            DailyForecast(
+                                modifier = Modifier
+                                    .fillMaxWidth(.67f)
+                                    .fillMaxHeight(.46f)
+                                    .padding(horizontal = 15.dp),
+                                icon = nowHourlyWeather.icon,
+                                iconSize = 174.dp,
+                                temp = tempHourly,
+                                title = nowHourlyWeather.conditions,
+                                subtitle = DateFormat.getDateInstance(DateFormat.ERA_FIELD)
+                                    .format(Date(nowHourlyWeather.datetimeEpoch.toLong() * 1000)),
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    color = Color(0x28FFFFFF), shape =
-                                        RoundedCornerShape(10.dp)
-                                )
-                                .padding(5.dp)
-                                .basicMarquee(
-                                    iterations = 1000,
-                                    repeatDelayMillis = 1000,
-                                ),
-                            text = "$descriptionNews    ".repeat(2),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF234195),
-                            maxLines = 1,
-                            overflow = TextOverflow.Visible
-                        )
-                        Spacer(modifier = Modifier.height(5.dp))
-                        AirQualityBox(
-                            modifier = Modifier.padding(horizontal = 40.dp),
-                            nowWeather=nowHourlyWeather,
-                            mainViewModel=mainViewModel
-                        )
+                            Text(
+                                modifier = Modifier
+                                    .padding(horizontal = 10.dp)
+                                    .fillMaxWidth()
+                                    .background(
+                                        color = Color(0x28FFFFFF), shape =
+                                            RoundedCornerShape(10.dp)
+                                    )
+                                    .padding(5.dp)
+                                    .basicMarquee(
+                                        iterations = 1000,
+                                        repeatDelayMillis = 1000,
+                                    ),
+                                text = "$descriptionNews    ".repeat(2),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color(0xFF234195),
+                                maxLines = 1,
+                                overflow = TextOverflow.Visible
+                            )
+                            Spacer(modifier = Modifier.height(5.dp))
+                            AirQualityBox(
+                                modifier = Modifier.padding(horizontal = 50.dp),
+                                nowWeather = nowHourlyWeather,
+                                mainViewModel = mainViewModel
+                            )
 
-                        HeaderHourlyForecast(
-                            modifier = Modifier.padding(top = 8.dp),
-                            onHeaderForecastClicked = onNextDayClicked
+                            HeaderHourlyForecast(
+                                modifier = Modifier.padding(top = 8.dp, start = 10.dp, end = 10.dp),
+                                onHeaderForecastClicked = onNextDayClicked
+                            )
+                            HourlyForecast(
+                                modifier = Modifier.padding(top = 10.dp, bottom = 20.dp),
+                                listOfHour = nowDayWeather.hours.filter {
+                                    it.datetime.substringBefore(":").toInt() >= currentTime
+                                }, mainViewModel = mainViewModel
+                            )
+                        }
+                    }
+
+
+                    mainViewModel.existToFavorite(city = weatherInfo.address)
+                    val isFavorite = mainViewModel.isFavorite.collectAsState().value
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp, vertical = 100.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (!isFavorite) {
+                            TopAppBarButton(
+                                icon = R.drawable.star_nav_icon_2,
+                                modifier = Modifier.size(67.dp),
+                                iconSize = 30.dp,
+                                iconDescription = "star icon",
+                                onClickButton = {
+                                    mainViewModel.addToFavorite(weather = weatherInfo)
+                                }
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        TopAppBarButton(
+                            icon = R.drawable.update_icon,
+                            modifier = Modifier.size(67.dp),
+                            iconSize = 25.dp,
+                            iconDescription = "update icon",
+                            onClickButton = {
+                                refreshWeather()
+                            }
                         )
                     }
-                    HourlyForecast(listOfHour=nowDayWeather.hours.filter {
-                        it.datetime.substringBefore(":").toInt() >= currentTime
-                    },mainViewModel=mainViewModel)
                 }
             }
         }

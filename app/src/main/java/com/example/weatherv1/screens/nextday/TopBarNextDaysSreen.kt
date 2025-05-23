@@ -30,7 +30,7 @@ fun TopBarNextDaysScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Next 7 Days Forecast",
+                    text = "Next Days Forecast",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )

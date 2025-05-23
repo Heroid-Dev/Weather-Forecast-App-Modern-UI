@@ -55,7 +55,7 @@ fun HeaderHourlyForecast(
             }
         ) {
             Text(
-                text = "7-Day Forecasts", style = MaterialTheme.typography.labelMedium,
+                text = "Days Forecast", style = MaterialTheme.typography.labelMedium,
                 color = Color(0xFF3156B2)
             )
             Icon(

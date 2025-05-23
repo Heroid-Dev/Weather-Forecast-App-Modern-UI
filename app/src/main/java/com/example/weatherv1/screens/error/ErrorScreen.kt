@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -26,6 +28,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.weatherv1.R
+import retrofit2.HttpException
 
 @Composable
 fun ErrorScreen(error: Exception) {
@@ -34,6 +37,11 @@ fun ErrorScreen(error: Exception) {
         composition = composition,
         iterations = LottieConstants.IterateForever
     )
+    val errorCode = if (error is HttpException) {
+        error.code().toString()
+    } else {
+        "Unknown Error"
+    }
     Surface(modifier = Modifier.fillMaxSize()) {
         Image(
             modifier = Modifier.fillMaxSize(),
@@ -44,18 +52,28 @@ fun ErrorScreen(error: Exception) {
         Box(modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ){
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 LottieAnimation(
                     composition = composition,
                     progress = { progress },
                     modifier = Modifier.size(250.dp)
                 )
                 Spacer(modifier = Modifier.height(30.dp))
-                Text(
-                    text =error.localizedMessage!!,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF00409C))
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                    Text(
+                        text = "$errorCode:",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF00409C)
+                    )
+                    Text(
+                        text = "${error.message}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.W300,
+                        color = Color(0xFF00409C)
+                    )
+                }
             }
         }
     }
