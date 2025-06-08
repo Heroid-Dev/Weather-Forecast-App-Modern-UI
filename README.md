@@ -35,4 +35,4 @@ technologies_used:
   - DataStore (persistent key-value storage)
   - Visual Crossing Weather API
   - Lottie (for animations)
-  - Clean Architecture pattern
+  - Clean Architecture pattern like MVVM
