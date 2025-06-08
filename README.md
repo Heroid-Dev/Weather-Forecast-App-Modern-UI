@@ -1,4 +1,4 @@
-title: Weather Forecast App
+# Weather Forecast App
 
 overview: |
   A modern weather forecasting application developed with **Jetpack Compose** and **Kotlin**, leveraging the **Visual Crossing Weather API** to provide accurate weekly or bi-weekly weather forecasts.
